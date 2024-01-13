@@ -40,12 +40,15 @@ function App() {
             Còn nếu bạn chưa có tài khoản thì chọn bên dưới này nhé !! :{" "}
           </p>
           <div className="">
-            <button className="btn_dn">
+            <button className="btn_dk">
               <p>Đăng ký đi nào</p>
             </button>
           </div>
         </div>
       </body>
+      <footer className="footer">
+
+      </footer>
     </div>
   );
 }

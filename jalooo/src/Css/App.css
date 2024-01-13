@@ -69,3 +69,41 @@
   width: 180px;
   border-radius: 50%;
 }
+
+.btn_dn {
+  height: 50px;
+  width: 150px;
+  border-radius: 20px;
+  border: none;
+  box-shadow:2px 2px #233953b9;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn_dn:hover {
+  background-color: #27db9f;
+  color: aliceblue;
+}
+
+.btn_dk {
+  height: 50px;
+  width: 150px;
+  border-radius: 20px;
+  border: none;
+  box-shadow:2px 2px #233953b9;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn_dk:hover {
+  background-color: #27db9f;
+  color: aliceblue;
+}
+
+.footer{
+  height: 50px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background-color: #233953;
+}
