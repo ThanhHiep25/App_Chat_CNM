@@ -3,8 +3,9 @@ import "../../Css/App.css";
 import logo from "../../IMG/6.png";
 import gif_1 from "../../IMG/chat_1.gif";
 import gif_2 from "../../IMG/chat_2.gif";
+import { Link } from "react-router-dom";
 
-function App() {
+function WellScreen() {
   return (
     <div className="App">
       <header className="App-header">
@@ -32,9 +33,11 @@ function App() {
           <p className="title_3">Bắt đầu thôi nào : </p>
 
           <div className="">
-            <button className="btn_dn">
-              <p>Đăng nhập</p>
-            </button>
+            <Link to="me">
+              <button className="btn_dn">
+                <p>Đăng nhập</p>
+              </button>
+            </Link>
           </div>
           <p className="title_3">
             Còn nếu bạn chưa có tài khoản thì chọn bên dưới này nhé !! :{" "}
@@ -46,11 +49,9 @@ function App() {
           </div>
         </div>
       </body>
-      <footer className="footer">
-
-      </footer>
+      <footer className="footer"></footer>
     </div>
   );
 }
 
-export default App;
+export default WellScreen;
