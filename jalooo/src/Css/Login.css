@@ -45,6 +45,10 @@
   color: #757779;
 }
 
+.input-email:hover{
+    box-shadow: 0px 1px 4px 2px #26bbae7e;
+}
+
 .input-pass {
     height: 30px;
     width: 250px;
@@ -53,6 +57,10 @@
     border: 1px solid rgb(19, 106, 156);
     font-size: 14px;
     margin-top: 20px;
+}
+
+.input-pass:hover {
+    box-shadow: 0px 1px 4px 2px #26bbae7e;
 }
 
 /*button va textbutton*/
@@ -65,8 +73,29 @@
     background-color: rgb(24, 106, 212);
 }
 
+.btn-sub:hover{
+    background-color: rgb(24, 159, 212);
+}
+
 .text-sub {
     font-size: 14px;
     font-weight:bold;
     color: #ffff;
 }
+
+
+.Group-another-login {
+    margin-top: 20px;
+}
+
+.another-login {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.another-login .logo-another-login {
+    height: 50px;
+    width: 50px;
+}
+

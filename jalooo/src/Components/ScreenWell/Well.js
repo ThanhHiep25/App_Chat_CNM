@@ -3,9 +3,16 @@ import "../../Css/App.css";
 import logo from "../../IMG/6.png";
 import gif_1 from "../../IMG/chat_1.gif";
 import gif_2 from "../../IMG/chat_2.gif";
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 function WellScreen() {
+  const navigate = useNavigate();
+
+  const DangNhap = () =>{
+    navigate('/me');
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -33,11 +40,9 @@ function WellScreen() {
           <p className="title_3">Bắt đầu thôi nào : </p>
 
           <div className="">
-            <Link to="me">
-              <button className="btn_dn">
+              <button className="btn_dn" onClick={DangNhap}>
                 <p>Đăng nhập</p>
               </button>
-            </Link>
           </div>
           <p className="title_3">
             Còn nếu bạn chưa có tài khoản thì chọn bên dưới này nhé !! :{" "}
