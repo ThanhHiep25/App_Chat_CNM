@@ -1,0 +1,20 @@
+.Chat-list{
+    background-color: antiquewhite;
+    width: 300px;
+}
+
+.Border-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-chat {
+    border: none;
+    margin-top: 3px;
+    height: 80px;
+    background-color: #ffff;
+}
+
+.btn-chat:hover{
+    background-color: #e2d9d977;
+}

@@ -6,7 +6,11 @@ import messager from "../../IMG/messager.png";
 import listphone from "../../IMG/listphone.png";
 import todo from "../../IMG/to_do.png";
 import setting from "../../IMG/setting.png";
+import { useCookies } from "react-cookie";
+import Listchat from "./Listchat";
+
 const Chat = () => {
+  const [cookies, setCookies] = useCookies(["user"]);
   return (
     <div className="App-chat">
       <div className="App-menu">
@@ -33,7 +37,9 @@ const Chat = () => {
         </div>
       </div>
 
-      <div></div>
+     
+        <Listchat/>
+     
 
       <div></div>
     </div>

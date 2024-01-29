@@ -7,16 +7,18 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from "react-cookie";
 
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 function Login() {
   const [state, setState] = useState([]);
+  const [cookies, setCookies] = useCookies();
   const [email, setMail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const fechapi = () => {
-    fetch(url)
+  const fechapi = async () => {
+    await fetch(url)
       .then((res) => res.json())
       .then((data) => {
         setState(data);
@@ -34,8 +36,11 @@ function Login() {
       // 3. Compare the entered password with the fetched password
       if (user.pass === password) {
         // 4. Login successful: Handle successful login logic here
+        setCookies('user', user);
+        sessionStorage.setItem("user", user);
         toast.success("Đăng nhập thành công!");
         navigate('/chat');
+        
         // For example, navigate to a protected route or store user data in local storage
       } else {
         // 5. Incorrect password: Handle invalid password scenario
