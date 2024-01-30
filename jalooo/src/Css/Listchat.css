@@ -1,20 +1,34 @@
-.Chat-list{
-    background-color: antiquewhite;
-    width: 300px;
+.Chat-list {
+  background-color: antiquewhite;
+  width: 330px;
 }
 
 .Border-list {
-    display: flex;
-    flex-direction: column;
+  overflow-y: scroll;
+  height: 100vh;
+  min-height: 100vh;
 }
 
 .btn-chat {
-    border: none;
-    margin-top: 3px;
-    height: 80px;
-    background-color: #ffff;
+  border: none;
+  background-color: #ffff;
+  height: 70px;
+  width: 315px;
+  display: flex;
+  flex-direction: column;
+
 }
 
-.btn-chat:hover{
-    background-color: #e2d9d977;
+.btn-chat:hover {
+  background-color: #e2d9d977;
+}
+
+.ul-set {
+  list-style: none;
+  margin-left: -40px;
+}
+
+.li-set {
+    margin-top: -15px;
+
 }

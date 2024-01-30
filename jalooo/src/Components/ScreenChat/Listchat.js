@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-//import { useCookies } from "react-cookie";
+import { useCookies } from "react-cookie";
 import "../../Css/Listchat.css";
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/chats";
 
 const Listchat = () => {
-  //const [cookies, setCookies] = useCookies(["user"]);
+  const [cookies, setCookies] = useCookies(["user"]);
   const [list, setList] = useState([]);
 
   const fechapiList = async () => {
@@ -27,7 +27,11 @@ const Listchat = () => {
     if (!seenResenders.has(item.resender)) {
       seenResenders.add(item.resender);
       return (
-      <button className="btn-chat">{item.resender}</button>
+        <ul className="ul-set">
+          <li className="li-set">
+            <button className="btn-chat">{item.resender}</button>
+          </li>
+        </ul>
       );
     }
     return null;

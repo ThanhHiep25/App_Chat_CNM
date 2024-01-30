@@ -11,6 +11,9 @@ import Listchat from "./Listchat";
 
 const Chat = () => {
   const [cookies, setCookies] = useCookies(["user"]);
+  console.log('====================================');
+  console.log(cookies);
+  console.log('====================================');
   return (
     <div className="App-chat">
       <div className="App-menu">
