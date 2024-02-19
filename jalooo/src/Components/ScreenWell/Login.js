@@ -6,7 +6,7 @@ import logo_facebook from "../../IMG/Facebook.png";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
@@ -36,11 +36,11 @@ function Login() {
       // 3. Compare the entered password with the fetched password
       if (user.pass === password) {
         // 4. Login successful: Handle successful login logic here
-        setCookies('user', user);
+        setCookies("user", user);
         sessionStorage.setItem("user", user);
         toast.success("Đăng nhập thành công!");
-        navigate('/chat');
-        
+        navigate("/chat");
+
         // For example, navigate to a protected route or store user data in local storage
       } else {
         // 5. Incorrect password: Handle invalid password scenario
@@ -66,20 +66,22 @@ function Login() {
         </div>
         <div className="Group-login-pass">
           <input
+            type="email"
             placeholder="SDT hoac Email"
             value={email}
             onChange={(event) => setMail(event.target.value)}
             className="input-email"
           />
           <input
+            type="password"
             placeholder="Mật khẩu"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="input-pass"
           />
 
-          <button type="submit" className="btn-sub" onClick={checkLogin}>          
-              <p className="text-sub">Đăng nhập</p>
+          <button type="submit" className="btn-sub" onClick={checkLogin}>
+            <p className="text-sub">Đăng nhập</p>
           </button>
         </div>
         <div className="Group-another-login">

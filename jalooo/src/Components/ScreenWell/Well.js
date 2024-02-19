@@ -4,14 +4,18 @@ import logo from "../../IMG/6.png";
 import gif_1 from "../../IMG/chat_1.gif";
 import gif_2 from "../../IMG/chat_2.gif";
 //import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 function WellScreen() {
   const navigate = useNavigate();
 
-  const DangNhap = () =>{
-    navigate('/me');
-  }
+  const DangNhap = () => {
+    navigate("/me");
+  };
+
+  const DangKy = () => {
+    navigate("/signup");
+  };
 
   return (
     <div className="App">
@@ -40,15 +44,15 @@ function WellScreen() {
           <p className="title_3">Bắt đầu thôi nào : </p>
 
           <div className="">
-              <button className="btn_dn" onClick={DangNhap}>
-                <p>Đăng nhập</p>
-              </button>
+            <button className="btn_dn" onClick={DangNhap}>
+              <p>Đăng nhập</p>
+            </button>
           </div>
           <p className="title_3">
             Còn nếu bạn chưa có tài khoản thì chọn bên dưới này nhé !! :{" "}
           </p>
           <div className="">
-            <button className="btn_dk">
+            <button className="btn_dk" onClick={DangKy}>
               <p>Đăng ký đi nào</p>
             </button>
           </div>
