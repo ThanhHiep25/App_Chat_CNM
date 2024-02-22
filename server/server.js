@@ -1,35 +1,50 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const express = require("express");
+const nodemailer = require("nodemailer");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+
 
 // Cấu hình CORS
 app.use(cors());
 
 app.use(bodyParser.json());
+const activeOtps = {}; // Lưu trữ mã OTP đang hoạt động
 
-app.post('/send-otp', async (req, res) => {
+app.post("/send-otp", async (req, res) => {
   const { email } = req.body;
+  
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
-      user: 'hiepnguyen.250402@gmail.com', // Thay bằng email của bạn
-      pass: 'tirnmdjizygalpaw', // Thay bằng mật khẩu email của bạn
+      user: "contact.jaloo.1@gmail.com", // Thay bằng email của bạn
+      pass: "crvduchreryntkxe", // Thay bằng mật khẩu email của bạn
     },
   });
 
   const otp = Math.floor(100000 + Math.random() * 900000);
 
   const mailOptions = {
-    from: 'hiepnguyen.250402@gmail.com',
+    from: "contact.jaloo.1@gmail.com",
     to: email,
-    subject: 'Xác thực OTP',
-    text: `Mã OTP của bạn là: ${otp}`,
+    subject: "Xác thực OTP - Jaloo",
+    html: `
+   
+    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; borderRadius: 10px;">
+    <h2 style="color: #333;">Xin chào,</h2>
+    <p style="color: #666;">Mã OTP của bạn là: <span style="color: #15F5BA;"}> ${otp}</span></p>
+    <p style="color: #666;">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+    <p style="color: #666;">Vui lòng không cung cấp mã OTP này cho người khác</p>
+    <p style="color: #666;">Thân ái,</p>
+    <p style="color: #666;">Đội ngũ hỗ trợ</p>
+  </div>
+  `,
   };
+
 
   try {
     await transporter.sendMail(mailOptions);
@@ -37,7 +52,7 @@ app.post('/send-otp', async (req, res) => {
     res.status(200).json({ success: true, otp });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Error sending email' });
+    res.status(500).json({ success: false, message: "Error sending email" });
   }
 });
 
