@@ -6,23 +6,19 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-
-
 // Cấu hình CORS
 app.use(cors());
 
 app.use(bodyParser.json());
-const activeOtps = {}; // Lưu trữ mã OTP đang hoạt động
 
 app.post("/send-otp", async (req, res) => {
   const { email } = req.body;
-  
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
       user: "contact.jaloo.1@gmail.com", // Thay bằng email của bạn
-      pass: "crvduchreryntkxe", // Thay bằng mật khẩu email của bạn
+      pass: "hfkskqjmhvrtnjih", // Thay bằng mật khẩu email của bạn
     },
   });
 
@@ -31,12 +27,12 @@ app.post("/send-otp", async (req, res) => {
   const mailOptions = {
     from: "contact.jaloo.1@gmail.com",
     to: email,
-    subject: "Xác thực OTP - Jaloo",
+    subject: "Xác thực OTP",
     html: `
    
-    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; borderRadius: 10px;">
+    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
     <h2 style="color: #333;">Xin chào,</h2>
-    <p style="color: #666;">Mã OTP của bạn là: <span style="color: #15F5BA;"}> ${otp}</span></p>
+    <p style="color: #666;">Mã OTP của bạn là: ${otp}</p>
     <p style="color: #666;">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
     <p style="color: #666;">Vui lòng không cung cấp mã OTP này cho người khác</p>
     <p style="color: #666;">Thân ái,</p>
@@ -44,7 +40,6 @@ app.post("/send-otp", async (req, res) => {
   </div>
   `,
   };
-
 
   try {
     await transporter.sendMail(mailOptions);
@@ -55,6 +50,33 @@ app.post("/send-otp", async (req, res) => {
     res.status(500).json({ success: false, message: "Error sending email" });
   }
 });
+
+
+// Endpoint kiểm tra email trùng
+app.post("/check-email", async (req, res) => {
+  const emailToCheck = req.body.email;
+
+  try {
+    const apiResponse = await fetch("https://65557a0784b36e3a431dc70d.mockapi.io/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: emailToCheck,
+      }),
+    });
+
+    const data = await apiResponse.json();
+
+    // Trả kết quả từ API về client
+    res.json(data);
+  } catch (error) {
+    console.error("Error checking email:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

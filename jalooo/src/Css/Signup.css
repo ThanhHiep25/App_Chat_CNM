@@ -28,6 +28,16 @@
     padding-left: 10px;
 }
 
+.in-otp {
+    height: 30px;
+    width: 190px;
+    margin: 10px;
+    border-radius: 5px;
+    border: none;
+    padding: 3px;
+    padding-left: 10px;
+}
+
 .group-in {
     display: flex;
     flex-direction: column;
@@ -38,4 +48,19 @@
 .title {
     font-size: 30px;
     font-weight: bold;
+}
+
+.group-otp {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn-otp {
+    height: 50px;
+    width: 90px;
+    border-radius: 5px;
+    margin: 10px;
+    border: none;
+    background-color: rgb(29, 128, 209);
 }

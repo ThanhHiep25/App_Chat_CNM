@@ -16,7 +16,12 @@ const Signup = () => {
   const [password2, setPassword2] = useState("");
   const [otp, setOtp] = useState(""); // Thêm state cho mã OTP
   const [isVerified, setIsVerified] = useState(false); // Thêm state cho trạng thái xác thực
+  // Định nghĩa biến trạng thái để lưu mã OTP được tạo ra
+  const [generatedOTP, setGeneratedOTP] = useState("");
+  // Định nghĩa biến trạng thái để theo dõi xem OTP đã được gửi hay chưa
+  const [otpSent, setOtpSent] = useState(false);
 
+  //Post signup user
   const Postuser = () => {
     if (isVerified && password === password2) {
       fetch(url, {
@@ -33,30 +38,50 @@ const Signup = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
-          toast.success("Đăng ký thành công!!");
-          setMail("");
-          setName("");
-          setPassword("");
-          setPassword2("");
-          setOtp("");
-        })
-        .catch((error) => {
-          console.error("Error registering user:", error);
-          toast.error("Đã có lỗi xảy ra khi đăng ký.");
+          window.location.reload();
         });
-    } else {
-      toast.error("Xác thực không thành công hoặc mật khẩu không khớp.");
     }
+    toast.success("Đăng ký thành công!!");
+    setMail("");
+    setName("");
+    setPassword("");
+    setPassword2("");
+    setOtp("");
   };
 
-  const isEmailValid = (email) => {
+
+  // Check mail
+  const isEmailValid = async (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Email không hợp lệ.");
       return false;
     }
-    return true;
+  
+    try {
+      const response = await fetch(`https://65557a0784b36e3a431dc70d.mockapi.io/user?email=${mail}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.exists) {
+        toast.error("Email đã được đăng ký.");
+        return false;
+      }
+  
+      return true;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      toast.error("Đã có lỗi xảy ra khi kiểm tra email.");
+      return false;
+    }
   };
 
   const isNameValid = (name) => {
@@ -83,31 +108,49 @@ const Signup = () => {
     return true;
   };
 
-  let receivedOtp = ""; // Khai báo biến để lưu trữ mã OTP đã gửi
-
   // Hàm gửi OTP qua email
   const sendOTP = async () => {
     if (isNameValid(name) && isEmailValid(mail) && isPasswordValid(password)) {
       try {
-        const response = await fetch("http://localhost:3001/send-otp", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: mail,
-          }),
-        });
+        // Kiểm tra xem OTP đã được gửi hay chưa
+        if (!otpSent) {
+          // Gọi endpoint trên server để tạo và gửi OTP
+          const response = await fetch("http://localhost:3001/send-otp", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: mail,
+            }),
+          });
 
-        const data = await response.json();
+          if (response.ok) {
+            // Lấy đối tượng JSON từ phản hồi của server
+            const responseData = await response.json();
 
-        if (data.success) {
-          // Lưu trữ mã OTP đã gửi vào biến receivedOtp
-          receivedOtp = data.otp; // Giả sử server trả về mã OTP trong field 'otp'
-          toast.success("Mã OTP đã được gửi đến email của bạn!");
+            // Lấy mã OTP từ thuộc tính 'otp' của đối tượng
+            const otp = responseData?.otp;
+
+            if (otp) {
+              // Lưu mã OTP vào trạng thái
+              setGeneratedOTP(otp);
+
+              // Đặt cờ để chỉ định rằng OTP đã được gửi
+              setOtpSent(true);
+
+              toast.success("Mã OTP đã được gửi đến email của bạn!");
+            } else {
+              toast.error("Không nhận được mã OTP từ phản hồi của server.");
+            }
+          } else {
+            toast.error("Đã có lỗi xảy ra khi tạo và gửi OTP.");
+          }
         } else {
-          toast.error("Đã có lỗi xảy ra khi gửi mã OTP.");
+          toast.info(
+            "Mã OTP đã được gửi trước đó. Vui lòng kiểm tra email của bạn."
+          );
         }
       } catch (error) {
         console.error("Error sending OTP:", error);
@@ -115,48 +158,31 @@ const Signup = () => {
       }
     }
   };
+  // ... Mã khác ...
 
   // Hàm xác thực và đăng ký
   const verifyAndRegister = () => {
     // Kiểm tra tất cả các trường dữ liệu
     if (isNameValid(name) && isEmailValid(mail) && isPasswordValid(password)) {
       if (otp) {
-        fetch("http://localhost:3001/send-otp", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: mail,
-            otp: otp,
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              // Nếu mã OTP đúng, tiến hành đăng ký
-              if (otp === receivedOtp) {
-                setIsVerified(true);
-                // Gọi hàm Postuser và thực hiện các thao tác đăng ký ở đây
-                Postuser();
-              } else {
-                setIsVerified(false);
-                toast.error("Mã OTP không khớp. Vui lòng nhập lại OTP mới.");
-              }
-            } else {
-              setIsVerified(false);
-              toast.error("Mã OTP không hợp lệ!");
-            }
-          })
-          .catch((error) => {
-            console.error("Error verifying OTP:", error);
-            toast.error("Đã có lỗi xảy ra khi xác thực mã OTP.");
-          });
+        // Kiểm tra xem mã OTP nhập vào có khớp với mã OTP được tạo ra hay không
+        if (Number(otp) === Number(generatedOTP)) {
+          // Nếu mã OTP đúng, tiến hành đăng ký
+          setIsVerified(true);
+          Postuser();
+          // Thêm phần logic đăng ký ở đây (có thể gọi hàm Postuser)
+          setTimeout(() => {
+            window.location.reload();
+          }, 8000);
+        } else {
+          setIsVerified(false);
+          toast.error("Mã OTP không hợp lệ!");
+        }
       } else {
         toast.error("Vui lòng nhập mã OTP.");
       }
     }
+   
   };
 
   return (
@@ -177,7 +203,6 @@ const Signup = () => {
             value={mail}
             onChange={(event) => setMail(event.target.value)}
             className="in"
-            autoComplete="on"
           />
           <input
             type="password"
@@ -193,18 +218,18 @@ const Signup = () => {
             onChange={(event) => setPassword2(event.target.value)}
             className="in"
           />
-          <div>
-            <button className="btn-sub" type="button" onClick={sendOTP}>
-              <p className="text-sub">Gửi OTP</p>
-            </button>
+          <div className="group-otp">
             {/* Thêm trường nhập OTP */}
             <input
               type="text"
               placeholder="Nhập mã OTP..."
               value={otp}
               onChange={(event) => setOtp(event.target.value)}
-              className="in"
+              className="in-otp"
             />
+            <button className="btn-otp" type="button" onClick={sendOTP}>
+              <p className="text-sub">Gửi OTP</p>
+            </button>
           </div>
 
           <button className="btn-sub" type="button" onClick={verifyAndRegister}>

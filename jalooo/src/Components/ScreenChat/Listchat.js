@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useCookies } from "react-cookie";
+//import { useCookies } from "react-cookie";
 import "../../Css/Listchat.css";
 import add_user from "../../IMG/add-user.png";
 import add_group from "../../IMG/add-group.png";
@@ -7,7 +7,7 @@ import add_group from "../../IMG/add-group.png";
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/chats";
 
 const Listchat = () => {
-  const [cookies, setCookies] = useCookies(["user"]);
+  //const [cookies, setCookies] = useCookies(["user"]);
   const [list, setList] = useState([]);
 
   const fechapiList = async () => {
@@ -15,9 +15,6 @@ const Listchat = () => {
       .then((res) => res.json())
       .then((data) => {
         setList(data);
-        // console.log('====================================');
-        // console.log(data);
-        // console.log('====================================');
       });
   };
 
@@ -29,7 +26,7 @@ const Listchat = () => {
     if (!seenResenders.has(item.resender)) {
       seenResenders.add(item.resender);
       return (
-        <ul className="ul-set">
+        <ul className="ul-set" key={item.id}>
           <li className="li-set">
             <button
               className="btn-chat"
