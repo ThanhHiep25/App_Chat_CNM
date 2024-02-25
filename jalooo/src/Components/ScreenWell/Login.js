@@ -29,15 +29,23 @@ function Login() {
     fechapi();
   }, []);
 
+  const handleEnterKeyPress = (event) => {
+    if (event.key === "Enter") {
+      checkLogin();
+    }
+  };
+
   const checkLogin = () => {
     const user = state.find((user) => user.email === email);
 
     if (user) {
       // 3. Compare the entered password with the fetched password
       if (user.pass === password) {
+        const userWithoutPassword = { name: user.name, email: user.email };
+        // Tạo đối tượng mới chỉ chứa thông tin cần thiết
         // 4. Login successful: Handle successful login logic here
-        setCookies("user", user);
-        sessionStorage.setItem("user", user);
+        setCookies("user", userWithoutPassword);
+        sessionStorage.setItem("user", JSON.stringify(userWithoutPassword));
         toast.success("Đăng nhập thành công!");
         navigate("/chat");
 
@@ -55,7 +63,9 @@ function Login() {
       setMail("");
       setPassword("");
     }
+    document.addEventListener("keydown", handleEnterKeyPress);
   };
+  
 
   return (
     <div className="App-Login">
@@ -80,7 +90,12 @@ function Login() {
             className="input-pass"
           />
 
-          <button type="submit" className="btn-sub" onClick={checkLogin}>
+          <button
+            type="submit"
+            className="btn-sub"
+            onClick={checkLogin}
+            onKeyDown={handleEnterKeyPress}
+          >
             <p className="text-sub">Đăng nhập</p>
           </button>
         </div>

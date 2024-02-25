@@ -34,7 +34,7 @@ app.post("/send-otp", async (req, res) => {
     <h2 style="color: #333;">Xin chào,</h2>
     <p style="color: #666;">Mã OTP của bạn là: ${otp}</p>
     <p style="color: #666;">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
-    <p style="color: #666;">Vui lòng không cung cấp mã OTP này cho người khác</p>
+    <p style="color: #666;">Vui lòng không cung cấp mã OTP này cho người khác.</p>
     <p style="color: #666;">Thân ái,</p>
     <p style="color: #666;">Đội ngũ hỗ trợ</p>
   </div>
@@ -51,31 +51,6 @@ app.post("/send-otp", async (req, res) => {
   }
 });
 
-
-// Endpoint kiểm tra email trùng
-app.post("/check-email", async (req, res) => {
-  const emailToCheck = req.body.email;
-
-  try {
-    const apiResponse = await fetch("https://65557a0784b36e3a431dc70d.mockapi.io/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: emailToCheck,
-      }),
-    });
-
-    const data = await apiResponse.json();
-
-    // Trả kết quả từ API về client
-    res.json(data);
-  } catch (error) {
-    console.error("Error checking email:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 
 app.listen(PORT, () => {

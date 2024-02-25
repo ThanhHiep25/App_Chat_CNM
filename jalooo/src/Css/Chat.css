@@ -1,60 +1,76 @@
 .App-chat {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .App-menu {
-    width: 100px;
-    min-height: 100vh;
-    max-height: none;
-    background-color: #A0E9FF;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  width: 100px;
+  min-height: 100vh;
+  max-height: none;
+  background-color: #a0e9ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .img-logo {
-    height: 60px;
-    width: 60px;
-    margin: 10px;
+  height: 60px;
+  width: 60px;
+  margin: 10px;
+  border-radius: 50px;
 }
 
 .img-messager {
-
-    height: 30px;
-    width: 30px;
-    margin: 10px;
-
+  height: 30px;
+  width: 30px;
+  margin: 10px;
 }
 
 .img-listphone {
-    height: 30px;
-    width: 30px;
+  height: 30px;
+  width: 30px;
 }
 
 .img-to-do {
-    height: 30px;
-    width: 30px;
+  height: 30px;
+  width: 30px;
 }
 
 .img-setting {
-    height: 30px;
-    width: 30px;
+  height: 30px;
+  width: 30px;
 }
 
 .group-logo {
-    display: flex;
-    flex-direction: column;
-    margin-top: 30px;
-    min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  min-height: 75vh;
 }
 .btn-img {
-    height: 80px;
-    width: 100px;
-    background-color:#A0E9FF;
-    border: none;
+  height: 80px;
+  width: 100px;
+  background-color: #a0e9ff;
+  border: none;
 }
 
-.btn-img:hover{
-    background-color:#6edbfc;
+.btn-img:hover {
+  background-color: #6edbfc63;
+}
+
+.frame-chat {
+  width: 100%;
+}
+
+.barr-chat {
+  display: flex;
+  flex-direction: row;
+  height: 80px;
+  background-color: #a4e8fd4f;
+  padding: 10px;
+  align-items: center;
+}
+
+.btn-img.selected {
+  background-color: #6edbfc; /* Màu nền khi người dùng được chọn */
 }

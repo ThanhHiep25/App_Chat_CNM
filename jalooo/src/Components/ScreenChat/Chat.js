@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 //import Image from 'react-bootstrap/Image';
 import "../../Css/Chat.css";
 import logo from "../../IMG/6.png";
@@ -11,20 +11,44 @@ import Listchat from "./Listchat";
 
 const Chat = () => {
   const [cookies, setCookies] = useCookies(["user"]);
-  
+  const [currentChat, setCurrentChat] = useState(null);
+  const [currentComponent, setCurrentComponent] = useState("LISTCHAT");
+  const [color, setColor] = useState(0);
+  const handleSelectChat = (chatInfo) => {
+    setCurrentChat(chatInfo);
+  };
+
   return (
     <div className="App-chat">
       <div className="App-menu">
         <div>
-          <button className="btn-img">
+          <button
+            className="btn-img"
+            onClick={() => {
+              setColor(1);
+            }}
+          >
             <img src={logo} className="img-logo" alt="logo" />
+            <p>{cookies.user.name}</p>
           </button>
         </div>
         <div className="group-logo">
-          <button className="btn-img">
+          <button
+            className={`btn-img ${color === 1 ? "selected" : null}`}
+            onClick={() => {
+              setCurrentChat(null, "MESSAGER");
+              setColor(1);
+            }}
+          >
             <img src={messager} className="img-messager" alt="messager" />
           </button>
-          <button className="btn-img">
+          <button
+            className={`btn-img ${color === 2 ? "selected" : null}`}
+            onClick={() => {
+              setCurrentChat(null, "LISTPHONE");
+              setColor(2);
+            }}
+          >
             <img src={listphone} className="img-listphone" alt="listphone" />
           </button>
           <button className="btn-img">
@@ -37,12 +61,15 @@ const Chat = () => {
           </button>
         </div>
       </div>
-
-     
-        <Listchat/>
-     
-
-      <div></div>
+      {currentComponent === "LISTCHAT" && <Listchat onSelectChat={handleSelectChat} />}
+      <div className="frame-chat">
+        {currentChat && (
+          <div className="barr-chat">
+            <img className="img-logo" src={currentChat.img} alt="Logo" />
+            <p>{currentChat.resender}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -23,7 +23,7 @@ const Signup = () => {
 
   //Post signup user
   const Postuser = () => {
-    if (isVerified && password === password2) {
+    if (password === password2) {
       fetch(url, {
         method: "POST",
         headers: {
@@ -58,30 +58,7 @@ const Signup = () => {
       return false;
     }
   
-    try {
-      const response = await fetch(`https://65557a0784b36e3a431dc70d.mockapi.io/user?email=${mail}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (data.exists) {
-        toast.error("Email đã được đăng ký.");
-        return false;
-      }
-  
-      return true;
-    } catch (error) {
-      console.error("Error checking email:", error);
-      toast.error("Đã có lỗi xảy ra khi kiểm tra email.");
-      return false;
-    }
+   return true;
   };
 
   const isNameValid = (name) => {
@@ -173,7 +150,7 @@ const Signup = () => {
           // Thêm phần logic đăng ký ở đây (có thể gọi hàm Postuser)
           setTimeout(() => {
             window.location.reload();
-          }, 8000);
+          }, 5000);
         } else {
           setIsVerified(false);
           toast.error("Mã OTP không hợp lệ!");

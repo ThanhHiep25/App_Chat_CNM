@@ -1,5 +1,5 @@
 .Chat-list {
-  background-color: antiquewhite;
+  background-color: rgb(248, 248, 248);
   width: 330px;
 }
 
@@ -11,9 +11,11 @@
 /* Bar add fr */
 .bar-chat {
  margin: 10px;
+ height: 60px;
  display: flex;
  flex-direction: row;
  justify-content: space-between;
+ align-items: center;
 }
 
 .search-chat{
@@ -37,7 +39,7 @@
 }
 
 .btn-chat:hover {
-  background-color: #e2d9d977;
+  background-color: #f3c3c315;
 }
 
 .ul-set {
@@ -102,5 +104,16 @@
 .img-add{
   height: 24px;
   width: 24px;
+}
+
+/* Listchat.css */
+.ul-set.selected {
+  background-color: #e0e0e0; /* Màu nền khi người dùng được chọn */
+}
+
+.btn-chat.selected {
+  border: 2px solid #9ed3ff81; /* Màu đường viền khi người dùng được chọn */
+  /* Các thuộc tính CSS khác cho khi người dùng được chọn */
+  background-color: #9ffcff56;
 }
 
