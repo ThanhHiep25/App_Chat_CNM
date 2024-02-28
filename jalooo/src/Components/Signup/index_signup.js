@@ -58,7 +58,7 @@ const Signup = () => {
       return false;
     }
   
-   return true;
+   return true
   };
 
   const isNameValid = (name) => {
@@ -150,7 +150,7 @@ const Signup = () => {
           // Thêm phần logic đăng ký ở đây (có thể gọi hàm Postuser)
           setTimeout(() => {
             window.location.reload();
-          }, 5000);
+          }, 8000);
         } else {
           setIsVerified(false);
           toast.error("Mã OTP không hợp lệ!");

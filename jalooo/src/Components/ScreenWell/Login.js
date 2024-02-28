@@ -17,6 +17,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+
   const fechapi = async () => {
     await fetch(url)
       .then((res) => res.json())
@@ -45,7 +46,7 @@ function Login() {
         // Tạo đối tượng mới chỉ chứa thông tin cần thiết
         // 4. Login successful: Handle successful login logic here
         setCookies("user", userWithoutPassword);
-        sessionStorage.setItem("user", JSON.stringify(userWithoutPassword));
+        //sessionStorage.setItem("user", JSON.stringify(userWithoutPassword));
         toast.success("Đăng nhập thành công!");
         navigate("/chat");
 
@@ -65,7 +66,6 @@ function Login() {
     }
     document.addEventListener("keydown", handleEnterKeyPress);
   };
-  
 
   return (
     <div className="App-Login">

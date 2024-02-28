@@ -34,7 +34,8 @@ const Listchat = ({ onSelectChat }) => {
   const handleChatSelection = (item) => {
     setCurrentChat(item);
     onSelectChat(item);
-    setSelectedUserId(item.id); // Cập nhật state với ID của người dùng được chọn
+    setSelectedUserId(item.id);
+    fechapiList() // Cập nhật state với ID của người dùng được chọn
   };
 
   const renderedList = filteredList.map((item) => {
