@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const uri = "mongodb+srv://mongo:<Hiepnguyen123>@cluster0.qh6yi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Cấu hình CORS
 app.use(cors());
@@ -51,7 +52,25 @@ app.post("/send-otp", async (req, res) => {
   }
 });
 
+//test get api
 
+const dbName = 'user_fly'; // Thay đổi tên database của bạn
+const collectionName = 'user';
+
+app.get("/api/user", async (req, res) => {
+  try {
+    const apiResponse = await fetch(
+      "https://65557a0784b36e3a431dc70d.mockapi.io/user"
+    );
+    const userData = await apiResponse.json();
+    res.json(userData);
+    console.log(userData);
+    
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

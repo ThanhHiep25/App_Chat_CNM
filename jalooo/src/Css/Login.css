@@ -29,6 +29,7 @@
   width: 100px;
 }
 
+/* Khung bao IMG vs Input */
 .Group-login-pass {
   display: flex;
   flex-direction: column;
@@ -51,7 +52,7 @@
 
 .input-pass {
     height: 30px;
-    width: 250px;
+    width: 210px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid rgb(19, 106, 156);
@@ -61,6 +62,26 @@
 
 .input-pass:hover {
     box-shadow: 0px 1px 4px 2px #26bbae7e;
+}
+
+.group-pass-login{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-pass-login{
+  height: 30px;
+  width: 30px;
+  border-radius: 3px;
+  border: none;
+  background-color: #ffffff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-left: 10px;
+
 }
 
 /*button va textbutton*/
@@ -98,4 +119,6 @@
     height: 50px;
     width: 50px;
 }
+
+
 

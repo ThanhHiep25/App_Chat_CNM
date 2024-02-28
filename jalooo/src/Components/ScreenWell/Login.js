@@ -9,20 +9,21 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
+const url = "http://localhost:3001/api/user";
 function Login() {
   const [state, setState] = useState([]);
   const [cookies, setCookies] = useCookies();
   const [email, setMail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
 
   const fechapi = async () => {
     await fetch(url)
       .then((res) => res.json())
       .then((data) => {
         setState(data);
+        console.log(data);
       });
   };
 
@@ -36,9 +37,37 @@ function Login() {
     }
   };
 
+  // Check mail
+  const isEmailValid = async (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Email không hợp lệ.");
+      return false;
+    }
+  
+   return true
+  };
+
+// Check password
+  const isPasswordValid = (password) => {
+    if (!password) {
+      toast.error("Vui lòng nhập mật khẩu.");
+      return false;
+    }
+    // Điều kiện password (in hoa chữ đầu kèm số)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      toast.error(
+        "Mật khẩu phải chứa ít nhất một chữ in hoa, một số và có ít nhất 6 ký tự."
+      );
+      return false;
+    }
+    return true;
+  };
+
   const checkLogin = () => {
     const user = state.find((user) => user.email === email);
-
+ if (isEmailValid(email) && isPasswordValid(password)) {
     if (user) {
       // 3. Compare the entered password with the fetched password
       if (user.pass === password) {
@@ -64,9 +93,13 @@ function Login() {
       setMail("");
       setPassword("");
     }
+  }
     document.addEventListener("keydown", handleEnterKeyPress);
   };
 
+  const handlePasswordVisibility = () => {
+    setSecureTextEntry(!secureTextEntry);
+  };
   return (
     <div className="App-Login">
       <div className="Bar-Border">
@@ -82,13 +115,20 @@ function Login() {
             onChange={(event) => setMail(event.target.value)}
             className="input-email"
           />
-          <input
-            type="password"
-            placeholder="Mật khẩu"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="input-pass"
-          />
+
+          <div className="group-pass-login">
+            <input
+              type={secureTextEntry ? "password" : "text"}
+              placeholder="Mật khẩu"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="input-pass"
+            />
+
+            <button onClick={handlePasswordVisibility} className="btn-pass-login">
+              <p className="text-pass-login">{secureTextEntry ? "Hiện" : "Ẩn"}</p>
+            </button>
+          </div>
 
           <button
             type="submit"
