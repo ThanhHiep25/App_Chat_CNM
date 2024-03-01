@@ -9,6 +9,9 @@ import setting from "../../IMG/setting.png";
 import send from "../../IMG/send.png";
 import upload_file from "../../IMG/upload_file.png";
 import upload_img from "../../IMG/upload_img.png";
+import call from "../../IMG/call.png";
+import call_video from "../../IMG/call_video.png";
+import menu from "../../IMG/menu.png";
 import { useCookies } from "react-cookie";
 import Listchat from "./Listchat";
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
@@ -23,28 +26,6 @@ const Chat = () => {
     setCurrentChat(chatInfo);
   };
 
-  const handleUpdateMessage = () => {
-    const link = `https://65557a0784b36e3a431dc70d.mockapi.io/chats/${currentChat.id}`;
-  
-    fetch(link, {
-      method: "PUT", // Sử dụng PUT để cập nhật dữ liệu
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-      
-        messagerresender: mess, // Đặt thông tin mới của messagerresender
-      }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      // Xử lý kết quả trả về sau khi cập nhật
-      console.log("Update successful:", data);
-    })
-    .catch(error => {
-      console.error("Error updating message:", error);
-    });
-  };
   return (
     <div className="App-chat">
       <div className="App-menu">
@@ -96,16 +77,40 @@ const Chat = () => {
           <div className="sreen-chat">
             {/* Bar chat hien thi thong tin */}
             <div className="barr-chat">
-              <img className="img-logo" src={currentChat.img} alt="Logo" />
-              <p>{currentChat.resender}</p>
+              <div className="barr-chat-1">
+                <img className="img-logo" src={currentChat.img} alt="Logo" />
+                <p>{currentChat.resender}</p>
+              </div>
+              <div className="call">
+                <button className="btn-chatcall">
+                  <img className="img-bar-chatcall" src={call} alt="call" title="call"/>
+                </button>
+                <button className="btn-chatcall">
+                  <img className="img-bar-chatcall" src={call_video} alt="call_video" title="video call"/>
+                </button>
+                <button className="btn-chatcall">
+                  <img className="img-bar-chatcall" src={menu} alt="menu" title="Menu" />
+                </button>
+              </div>
             </div>
             <div className="ren-chat">
-              <p>{currentChat.messagerresender}</p>
+              <div className="sender-chat">
+                <img
+                  className="img-logo-chatsend"
+                  src={currentChat.img}
+                  alt="Mess"
+                />
+                <p className="text-chat">{currentChat.messagersender}</p>
+              </div>
             </div>
 
             <div className="chat-send-bottom">
               <button className="btn-chat-upload-file">
-                 <img className="img-upload" src={upload_file} alt="upload_file" />
+                <img
+                  className="img-upload"
+                  src={upload_file}
+                  alt="upload_file"
+                />
               </button>
 
               <button className="btn-chat-upload-img">
@@ -118,7 +123,32 @@ const Chat = () => {
                 onChange={(event) => setMessages(event.target.value)}
                 placeholder="..."
               />
-              <button className="btn-send" onClick={handleUpdateMessage()}>
+              <button
+                className="btn-send"
+                onClick={() => {
+                  fetch(
+                    `https://65557a0784b36e3a431dc70d.mockapi.io/chats/${currentChat.id}`,
+                    {
+                      method: "PUT", // Sử dụng PUT để cập nhật dữ liệu
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        messagersender: mess, // Đặt thông tin mới của messagerresender
+                      }),
+                    }
+                  )
+                    .then((response) => response.json())
+                    .then((data) => {
+                      // Xử lý kết quả trả về sau khi cập nhật
+                      console.log("Update successful:", data);
+                      setMessages("");
+                    })
+                    .catch((error) => {
+                      console.error("Error updating message:", error);
+                    });
+                }}
+              >
                 <img className="img-send-chat" src={send} alt="send" />
               </button>
             </div>

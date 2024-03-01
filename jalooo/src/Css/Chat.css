@@ -58,11 +58,23 @@
   background-color: #6edbfc63;
 }
 
+/*-------------------Khung chat*/
+
 .frame-chat {
   width: 100%;
 }
 
 .barr-chat {
+  display: flex;
+  flex-direction: row;
+  height: 80px;
+  background-color: #a4e8fd4f;
+  padding: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.barr-chat-1 {
   display: flex;
   flex-direction: row;
   height: 80px;
@@ -80,10 +92,33 @@
 
 .ren-chat {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
 }
 
+.sender-chat {
+  display: flex;
+  width: 320px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-chat {
+  height: "auto";
+  width: 250px;
+  background-color: #6edbfc;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.img-logo-chatsend {
+  height: 40px;
+  width: 40px;
+  border-radius: 10px;
+}
+
+/* Input chat */
 .chat-send-bottom {
   width: 100%;
   display: flex;
@@ -108,18 +143,18 @@
   width: 30px;
 }
 
-.img-upload{
+.img-upload {
   height: 30px;
   width: 30px;
 }
 
-.btn-send{
+.btn-send {
   border: none;
   background-color: #fff;
   margin-left: 10px;
 }
 
-.btn-chat-upload-file{
+.btn-chat-upload-file {
   border: none;
   background-color: #ffffff;
   display: flex;
@@ -130,7 +165,7 @@
   border-radius: 5px;
 }
 
-.btn-chat-upload-img{
+.btn-chat-upload-img {
   border: none;
   background-color: #ffffff;
   display: flex;
@@ -144,4 +179,29 @@
 
 .btn-img.selected {
   background-color: #6edbfc; /* Màu nền khi người dùng được chọn */
+}
+
+
+/*Call _ call video*/
+
+.call{
+  display: flex;
+  flex-direction: row;
+}
+
+.btn-chatcall {
+ height: 50px;
+ width: 50px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ border-radius: 2px;
+ background-color:#6edbfc00 ;
+ margin-left: 10px;
+ border: none;
+}
+
+.img-bar-chatcall {
+  height: 25px;
+  width: 25px;
 }
