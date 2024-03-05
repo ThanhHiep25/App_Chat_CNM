@@ -52,7 +52,7 @@ app.post("/send-otp", async (req, res) => {
   }
 });
 
-//test get api
+//test get api lên login
 
 const dbName = 'user_fly'; // Thay đổi tên database của bạn
 const collectionName = 'user';

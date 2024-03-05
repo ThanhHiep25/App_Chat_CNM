@@ -14,6 +14,9 @@ import call_video from "../../IMG/call_video.png";
 import menu from "../../IMG/menu.png";
 import { useCookies } from "react-cookie";
 import Listchat from "./Listchat";
+import Phone from "../ListPhone/Phone";
+import ShortVideo from "../ShortVideo/shortVideo";
+import Setting from "../Setting/setting";
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 const Chat = () => {
   const [cookies, setCookies] = useCookies(["user"]);
@@ -21,6 +24,11 @@ const Chat = () => {
   const [currentComponent, setCurrentComponent] = useState("LISTCHAT");
   const [color, setColor] = useState(0);
   const [mess, setMessages] = useState("");
+
+  const handleTabChange = (tab) => {
+    setCurrentComponent(tab);
+  };
+
 
   const handleSelectChat = (chatInfo) => {
     setCurrentChat(chatInfo);
@@ -44,7 +52,8 @@ const Chat = () => {
           <button
             className={`btn-img ${color === 1 ? "selected" : null}`}
             onClick={() => {
-              setCurrentChat(null, "MESSAGER");
+              handleTabChange("LISTCHAT")
+             handleSelectChat(null, "MESSAGER");
               setColor(1);
             }}
           >
@@ -53,13 +62,21 @@ const Chat = () => {
           <button
             className={`btn-img ${color === 2 ? "selected" : null}`}
             onClick={() => {
-              setCurrentChat(null, "LISTPHONE");
-              setColor(2);
+              handleTabChange("PHONE")
+              handleSelectChat(null, "PHONE");
+              setColor(2)
             }}
           >
             <img src={listphone} className="img-listphone" alt="listphone" />
           </button>
-          <button className="btn-img">
+          <button
+            className={`btn-img ${color === 3 ? "selected" : null}`}
+            onClick={() => {
+              handleTabChange("SHORTVIDEO");
+              handleSelectChat(null, "SHORTVIDEO");
+              setColor(3);
+            }}
+          >
             <img src={todo} className="img-to-do" alt="todo" />
           </button>
         </div>
@@ -69,11 +86,16 @@ const Chat = () => {
           </button>
         </div>
       </div>
-      {currentComponent === "LISTCHAT" && (
+      {currentComponent === "LISTCHAT" ? (
         <Listchat onSelectChat={handleSelectChat} />
+      ) : currentComponent === "PHONE" ? (
+        <Phone/>
+      ) : (
+        currentComponent === "SHORTVIDEO" &&( <ShortVideo />)
       )}
+
       <div className="frame-chat">
-        {currentChat && (
+      {currentChat && (
           <div className="sreen-chat">
             {/* Bar chat hien thi thong tin */}
             <div className="barr-chat">
@@ -83,24 +105,51 @@ const Chat = () => {
               </div>
               <div className="call">
                 <button className="btn-chatcall">
-                  <img className="img-bar-chatcall" src={call} alt="call" title="call"/>
+                  <img
+                    className="img-bar-chatcall"
+                    src={call}
+                    alt="call"
+                    title="call"
+                  />
                 </button>
                 <button className="btn-chatcall">
-                  <img className="img-bar-chatcall" src={call_video} alt="call_video" title="video call"/>
+                  <img
+                    className="img-bar-chatcall"
+                    src={call_video}
+                    alt="call_video"
+                    title="video call"
+                  />
                 </button>
                 <button className="btn-chatcall">
-                  <img className="img-bar-chatcall" src={menu} alt="menu" title="Menu" />
+                  <img
+                    className="img-bar-chatcall"
+                    src={menu}
+                    alt="menu"
+                    title="Menu"
+                  />
                 </button>
               </div>
             </div>
             <div className="ren-chat">
-              <div className="sender-chat">
-                <img
-                  className="img-logo-chatsend"
-                  src={currentChat.img}
-                  alt="Mess"
-                />
-                <p className="text-chat">{currentChat.messagersender}</p>
+              <div className="set-resenchat">
+                <div className="resender-chat">
+                  <img
+                    className="img-logo-chatsend"
+                    src={currentChat.img}
+                    alt="Mess"
+                  />{" "}
+                  <p className="text-chat">{currentChat.messagersender}</p>
+                </div>
+              </div>
+              <div className="set-senchat">
+                <div className="sender-chat">
+                  <p className="text-chat">{currentChat.messagersender}</p>
+                  <img
+                    className="img-logo-chatsend"
+                    src={currentChat.img}
+                    alt="Mess"
+                  />
+                </div>
               </div>
             </div>
 
@@ -141,8 +190,8 @@ const Chat = () => {
                     .then((response) => response.json())
                     .then((data) => {
                       // Xử lý kết quả trả về sau khi cập nhật
-                      console.log("Update successful:", data);
                       setMessages("");
+                      console.log("Update successful:", data);
                     })
                     .catch((error) => {
                       console.error("Error updating message:", error);
