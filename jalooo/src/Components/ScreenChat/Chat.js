@@ -29,7 +29,6 @@ const Chat = () => {
     setCurrentComponent(tab);
   };
 
-
   const handleSelectChat = (chatInfo) => {
     setCurrentChat(chatInfo);
   };
@@ -45,15 +44,14 @@ const Chat = () => {
             }}
           >
             <img src={logo} className="img-logo" alt="logo" />
-            <p>{cookies.user.name}</p>
           </button>
         </div>
         <div className="group-logo">
           <button
             className={`btn-img ${color === 1 ? "selected" : null}`}
             onClick={() => {
-              handleTabChange("LISTCHAT")
-             handleSelectChat(null, "MESSAGER");
+              handleTabChange("LISTCHAT");
+              handleSelectChat(null, "MESSAGER");
               setColor(1);
             }}
           >
@@ -62,9 +60,9 @@ const Chat = () => {
           <button
             className={`btn-img ${color === 2 ? "selected" : null}`}
             onClick={() => {
-              handleTabChange("PHONE")
+              handleTabChange("PHONE");
               handleSelectChat(null, "PHONE");
-              setColor(2)
+              setColor(2);
             }}
           >
             <img src={listphone} className="img-listphone" alt="listphone" />
@@ -81,7 +79,14 @@ const Chat = () => {
           </button>
         </div>
         <div>
-          <button className="btn-img">
+          <button
+            className={`btn-img ${color === 4 ? "selected" : null}`}
+            onClick={() => {
+              handleTabChange("SETTING");
+              handleSelectChat(null, "SETTING");
+              setColor(4);
+            }}
+          >
             <img src={setting} className="img-setting" alt="setting" />
           </button>
         </div>
@@ -89,13 +94,15 @@ const Chat = () => {
       {currentComponent === "LISTCHAT" ? (
         <Listchat onSelectChat={handleSelectChat} />
       ) : currentComponent === "PHONE" ? (
-        <Phone/>
+        <Phone />
+      ) : currentComponent === "SHORTVIDEO" ? (
+        <ShortVideo />
       ) : (
-        currentComponent === "SHORTVIDEO" &&( <ShortVideo />)
+        <Setting />
       )}
 
       <div className="frame-chat">
-      {currentChat && (
+        {currentChat && (
           <div className="sreen-chat">
             {/* Bar chat hien thi thong tin */}
             <div className="barr-chat">
