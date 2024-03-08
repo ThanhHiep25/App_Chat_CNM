@@ -4,9 +4,8 @@
 }
 
 .Border-list {
-  overflow-y: scroll;
-  height: 88%;
-  
+  overflow-y: scroll; 
+  height: 90vh;
 }
 /* Bar add fr */
 .bar-chat {

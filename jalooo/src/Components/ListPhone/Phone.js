@@ -6,16 +6,12 @@ import list_group from "../../IMG/list_group.png";
 import make_friend from "../../IMG/make_friend.png";
 import "../../Css/ListPhone.css";
 import { useNavigate } from "react-router-dom";
-import  "../../Css/ListPhone.css";
+import "../../Css/ListPhone.css";
 
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/chats";
 
 const Phone = ({ onSelectChat }) => {
   const navigate = useNavigate();
-
-  const Page2 = () => {
-    navigate("/Page2");
-  };
 
   const [currentTab, setCurrentTab] = useState("listGroup");
 
@@ -61,17 +57,13 @@ const Phone = ({ onSelectChat }) => {
       return (
         <ul className={`ul-set ${isSelected ? "selected" : ""}`} key={item.id}>
           <li className="li-set">
-            <button
-              className={`btn-chat1 ${isSelected ? "selected" : ""}`}
-              onClick={() => handleChatSelection(item)}
-            >
-              <img src={item.img} alt="imguser" className="Logo-user" />
-              <div className="chat-set-message">
-                <p className="name-user-resender">{item.resender}</p>
-                {/* <p className="messager-user-resender">
-                  {item.messagerresender}
-                </p> */}
+            <button className="btn-chat1">
+              <div className="chat-set-phone">
+                <img src={item.img} alt="imguser" className="Logo-user" />
+                <p className="lphone-user-resender">{item.resender}</p>
               </div>
+              
+             <button type="submit" className="btn-lp-menu">. . .</button>
             </button>
           </li>
         </ul>
@@ -81,35 +73,27 @@ const Phone = ({ onSelectChat }) => {
   });
   return (
     <div className="Chat-list11">
-      <div className="lllll">
-        <div className="bar-chat">
-          <input placeholder="search" className="search-chat" />
-          <div className="add-chat">
-            <button className="btn-add">
-              <img src={add_user} className="img-add" alt="add-user" />
-            </button>
-            <button className="btn-add">
-              <img src={add_group} className="img-add" alt="add-group" />
-            </button>
-          </div>
-        </div>
+      <div>
+        <div className="bar-chat"></div>
         <div className="list-friend">
           <button className="btn-list">
-            <img src={list_friend} className="img-list" />
+            <img src={list_friend} className="img-list" alt="List fen" />
             <p className="text-list">Danh sách bạn bè</p>
           </button>
         </div>
         <div className="list-friend">
           <button className="btn-list">
-            <img src={list_group} className="img-list" />
-            <p className="text-list" onClick={Page2}>
-              Danh sách nhóm
-            </p>
+            <img src={list_group} className="img-list" alt="List group" />
+            <p className="text-list">Danh sách nhóm</p>
           </button>
         </div>
         <div className="list-friend">
           <button className="btn-list">
-            <img src={make_friend} className="img-list" />
+            <img
+              src={make_friend}
+              className="img-list"
+              alt="Dach sach ket ban"
+            />
             <p
               className="text-list"
               onClick={() => handleTabChange("Avaatar2")}
@@ -122,7 +106,12 @@ const Phone = ({ onSelectChat }) => {
       <div className="list-ff">
         <p className="text-listfriend">Bạn bè</p>
         <div className="list-fff">
-          <input placeholder="Tìm bạn" className="search-chat1" />
+          <input
+            placeholder="Tìm bạn"
+            className="search-chat1"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <input
             className="list-option"
             type="text"

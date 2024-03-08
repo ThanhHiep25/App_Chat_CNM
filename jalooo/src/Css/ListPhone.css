@@ -46,19 +46,30 @@
   padding: 17px;
 }
 .Border-list1 {
-  height: 80%;
+  height: 80vh;
   padding: 10px;
+  overflow: scroll;
+  overflow-x: hidden;
+  overflow: -moz-hidden-unscrollable;
 }
 .btn-chat1 {
   border: none;
-  background-color: #ffff;
+  background-color: #d8d1d13b;
   height: 70px;
-  width: 315px;
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   margin-left: 20px;
+  margin-top: 30px;
+  border-radius: 5px;
 }
+
+.btn-chat1:hover {
+  background-color: #d9dce086;
+}
+
 .text-listfriend {
   font-size: 25px;
   font-weight: 600;
@@ -70,6 +81,19 @@
   display: flex;
   right: 50px;
 }
+
+.chat-set-phone{
+  display: flex;
+  flex-direction: row;
+  align-items: center;  
+  width: 200px;
+}
+
+.lphone-user-resender{
+  margin-left: 20px;
+}
+
+/*Search chat*/
 .search-chat1 {
   height: 25px;
   border: none;
@@ -94,6 +118,9 @@
   border-radius: 4px;
   width: 200px;
 }
+
+
+/* List fen chat */
 .list-option1 {
   width: 200px;
   margin-left: 100px;
@@ -118,4 +145,15 @@
   align-items: center;
   margin-right: 300px;
   margin-bottom: 30px;
+}
+
+.btn-lp-menu {
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: rgba(240, 248, 255, 0);
+  border-radius: 5px;
 }
