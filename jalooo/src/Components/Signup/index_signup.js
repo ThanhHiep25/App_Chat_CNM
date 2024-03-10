@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../../Css/Signup.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 
@@ -20,6 +21,7 @@ const Signup = () => {
   const [generatedOTP, setGeneratedOTP] = useState("");
   // Định nghĩa biến trạng thái để theo dõi xem OTP đã được gửi hay chưa
   const [otpSent, setOtpSent] = useState(false);
+  const navigate = useNavigate();
 
   //Post signup user
   const Postuser = () => {
@@ -37,18 +39,18 @@ const Signup = () => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          window.location.reload();
-        });
+        .then((data) => {});
     }
-    toast.success("Đăng ký thành công!!");
+    setTimeout(() => {
+      navigate("/me");
+    }, 3000);
     setMail("");
     setName("");
     setPassword("");
     setPassword2("");
     setOtp("");
+    toast.success("Đăng ký thành công!!");
   };
-
 
   // Check mail
   const isEmailValid = async (email) => {
@@ -57,8 +59,8 @@ const Signup = () => {
       toast.error("Email không hợp lệ.");
       return false;
     }
-  
-   return true
+
+    return true;
   };
 
   const isNameValid = (name) => {
@@ -159,7 +161,6 @@ const Signup = () => {
         toast.error("Vui lòng nhập mã OTP.");
       }
     }
-   
   };
 
   return (

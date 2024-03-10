@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Modal from "react-bootstrap/Modal";
 //import Image from 'react-bootstrap/Image';
 import "../../Css/Chat.css";
 import logo from "../../IMG/6.png";
@@ -17,6 +18,7 @@ import Listchat from "./Listchat";
 import Phone from "../ListPhone/Phone";
 import ShortVideo from "../ShortVideo/shortVideo";
 import Setting from "../Setting/setting";
+import Infor from "../Setting/infor";
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 const Chat = () => {
   const [cookies, setCookies] = useCookies(["user"]);
@@ -24,6 +26,13 @@ const Chat = () => {
   const [currentComponent, setCurrentComponent] = useState("LISTCHAT");
   const [color, setColor] = useState(0);
   const [mess, setMessages] = useState("");
+
+  //Modal
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => {
+    setShow(true);
+  };
 
   const handleTabChange = (tab) => {
     setCurrentComponent(tab);
@@ -37,15 +46,14 @@ const Chat = () => {
     <div className="App-chat">
       <div className="App-menu">
         <div>
-          <button
-            className="btn-img"
-            onClick={() => {
-              setColor(1);
-            }}
-          >
+          <button className="btn-img" onClick={()=>{
+            handleTabChange("INFOR");
+            handleSelectChat(null, null);
+          }}>
             <img src={logo} className="img-logo" alt="logo" />
           </button>
         </div>
+
         <div className="group-logo">
           <button
             className={`btn-img ${color === 1 ? "selected" : null}`}
@@ -82,8 +90,6 @@ const Chat = () => {
           <button
             className={`btn-img ${color === 4 ? "selected" : null}`}
             onClick={() => {
-              handleTabChange("SETTING");
-              handleSelectChat(null, "SETTING");
               setColor(4);
             }}
           >
@@ -91,18 +97,20 @@ const Chat = () => {
           </button>
         </div>
       </div>
-      {currentComponent === "LISTCHAT" ? (
+
+      {currentComponent === "INFOR" ? (
+        <Infor />
+      ) : currentComponent === "LISTCHAT" ? (
         <Listchat onSelectChat={handleSelectChat} />
       ) : currentComponent === "PHONE" ? (
         <Phone />
-      ) : currentComponent === "SHORTVIDEO" ? (
-        <ShortVideo />
       ) : (
-        <Setting />
+        currentComponent === "SHORTVIDEO" && <ShortVideo />
       )}
 
-      <div className="frame-chat">
-        {currentChat && (
+    
+        {currentChat && ( 
+           <div className="frame-chat">
           <div className="sreen-chat">
             {/* Bar chat hien thi thong tin */}
             <div className="barr-chat">
@@ -208,9 +216,9 @@ const Chat = () => {
                 <img className="img-send-chat" src={send} alt="send" />
               </button>
             </div>
-          </div>
+          </div> </div>
         )}
-      </div>
+     
     </div>
   );
 };

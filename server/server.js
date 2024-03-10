@@ -2,6 +2,8 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+require("dotenv").config();
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,15 +20,15 @@ app.post("/send-otp", async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "contact.jaloo.1@gmail.com", // Thay bằng email của bạn
-      pass: "hfkskqjmhvrtnjih", // Thay bằng mật khẩu email của bạn
+      user: process.env.EMAIL, // Thay bằng email của bạn
+      pass: process.env.PASS, // Thay bằng mật khẩu email của bạn
     },
   });
 
   const otp = Math.floor(100000 + Math.random() * 900000);
 
   const mailOptions = {
-    from: "contact.jaloo.1@gmail.com",
+    from: process.env.EMAIL,
     to: email,
     subject: "Xác thực OTP",
     html: `

@@ -1,12 +1,14 @@
+import React, { useState } from "react";
 
-import React from 'react'
 
 const Setting = () => {
   return (
-  <div>
-    <p>Setting</p>
-  </div>
-  )
-}
+    <div className="setting-fr">
+      <button>Thông tin cá nhân</button>
+      <button>Giới thiệu</button>
+      <button>Cài đặt</button>
+    </div>
+  );
+};
 
-export default Setting
+export default Setting;

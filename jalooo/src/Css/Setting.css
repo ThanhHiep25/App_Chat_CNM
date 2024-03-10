@@ -1,0 +1,4 @@
+.setting-fr{
+    display: flex;
+    flex-direction: column;
+}

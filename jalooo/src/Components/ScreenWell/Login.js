@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { set } from "mongoose";
 
 const url = "http://localhost:3001/api/user";
 function Login() {
@@ -77,8 +78,9 @@ function Login() {
         setCookies("user", userWithoutPassword);
         //sessionStorage.setItem("user", JSON.stringify(userWithoutPassword));
         toast.success("Đăng nhập thành công!");
-        navigate("/chat");
-
+        setTimeout(() => {
+           navigate("/chat");
+        }, 3000);
         // For example, navigate to a protected route or store user data in local storage
       } else {
         // 5. Incorrect password: Handle invalid password scenario

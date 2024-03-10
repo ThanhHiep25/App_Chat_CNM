@@ -102,12 +102,11 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-
 }
-.set-senchat{
+.set-senchat {
   display: flex;
   flex-direction: row;
-  justify-content:flex-end ;
+  justify-content: flex-end;
   width: 100%;
 }
 
@@ -125,12 +124,11 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-
 }
-.set-resenchat{
+.set-resenchat {
   display: flex;
   flex-direction: row;
-  justify-content:flex-start ;
+  justify-content: flex-start;
   width: 100%;
 }
 
@@ -203,27 +201,35 @@
   background-color: #6edbfc; /* Màu nền khi người dùng được chọn */
 }
 
-
 /*Call _ call video*/
 
-.call{
+.call {
   display: flex;
   flex-direction: row;
 }
 
 .btn-chatcall {
- height: 50px;
- width: 50px;
- display: flex;
- align-items: center;
- justify-content: center;
- border-radius: 2px;
- background-color:#6edbfc00 ;
- margin-left: 10px;
- border: none;
+  height: 50px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background-color: #6edbfc00;
+  margin-left: 10px;
+  border: none;
 }
 
 .img-bar-chatcall {
   height: 25px;
   width: 25px;
+}
+
+.modal-fr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 250px;
+  width: 250px;
+  position: absolute;
 }
