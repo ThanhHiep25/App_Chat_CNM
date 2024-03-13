@@ -19,6 +19,9 @@ import Phone from "../ListPhone/Phone";
 import ShortVideo from "../ShortVideo/shortVideo";
 import Setting from "../Setting/setting";
 import Infor from "../Setting/infor";
+import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
+import { Menu, MenuItem, Button } from "@mui/material";
+
 const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 const Chat = () => {
   const [cookies, setCookies] = useCookies(["user"]);
@@ -91,15 +94,40 @@ const Chat = () => {
           </button>
         </div>
         <div>
-          <button
+          {/* <button
             className={`btn-img ${color === 5 ? "selected" : null}`}
             onClick={() => {
-              handleTabChange("SETTING")
+              handleTabChange("SETTING");
               setColor(5);
             }}
           >
             <img src={setting} className="img-setting" alt="setting" />
-          </button>
+          </button> */}
+          <PopupState variant="popover" popupId="setting-menu">
+            {(popupState) => (
+              <React.Fragment>
+                <Button
+                  {...bindTrigger(popupState)}
+                  className={`btn-img ${color === 5 ? "selected" : null}`}
+                >
+                  <img src={setting} className="img-setting" alt="setting" />
+                </Button>
+                <Menu {...bindMenu(popupState)}>
+                  <MenuItem
+                    onClick={() => {
+                      handleTabChange("SETTING");
+                      //handleSelectChat(null, "SETTING");
+                      setColor(5);
+                      popupState.close();
+                    }}
+                  >
+                    Thông tin giới thiệu
+                  </MenuItem>
+                  <MenuItem >Logout</MenuItem>
+                </Menu>
+              </React.Fragment>
+            )}
+          </PopupState>
         </div>
       </div>
 
