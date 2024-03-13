@@ -38,11 +38,11 @@
 
 .input-email {
   height: 30px;
-  width: 250px;
+  width: 350px;
   border: 1px solid rgb(19, 106, 156);
   border-radius: 5px;
   padding: 5px;
-  font-size: 14px;
+  font-size: 16px;
   color: #757779;
 }
 
@@ -52,11 +52,11 @@
 
 .input-pass {
     height: 30px;
-    width: 210px;
+    width: 310px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid rgb(19, 106, 156);
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 20px;
 }
 

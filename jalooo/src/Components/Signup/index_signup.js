@@ -23,8 +23,8 @@ const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
 
-  //Post signup user
-  const Postuser = () => {
+  //Post signup user mockapi
+  /* const Postuser = () => {
     if (password === password2) {
       fetch(url, {
         method: "POST",
@@ -50,6 +50,46 @@ const Signup = () => {
     setPassword2("");
     setOtp("");
     toast.success("Đăng ký thành công!!");
+  };
+*/
+
+  // POST mongodb
+  const Postuser = () => {
+    if (password === password2) {
+      fetch("http://localhost:3001/api/register", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: mail,
+          pass: password,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            toast.success(data.message);
+            setTimeout(() => {
+              navigate("/me");
+            }, 3000);
+            setMail("");
+            setName("");
+            setPassword("");
+            setPassword2("");
+            setOtp("");
+            // Thực hiện các thao tác sau khi đăng ký thành công (chuyển hướng, làm mới trang, vv.)
+          } else {
+            toast.error(data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error registering user:", error);
+          toast.error("Đã có lỗi xảy ra khi đăng ký.");
+        });
+    }
   };
 
   // Check mail

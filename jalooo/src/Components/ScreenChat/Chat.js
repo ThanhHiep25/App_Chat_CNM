@@ -46,41 +46,45 @@ const Chat = () => {
     <div className="App-chat">
       <div className="App-menu">
         <div>
-          <button className="btn-img" onClick={()=>{
-            handleTabChange("INFOR");
-            handleSelectChat(null, null);
-          }}>
+          <button
+            className={`btn-img ${color === 1 ? "selected" : null}`}
+            onClick={() => {
+              handleTabChange("INFOR");
+              handleSelectChat(null, null);
+              setColor(1);
+            }}
+          >
             <img src={logo} className="img-logo" alt="logo" />
           </button>
         </div>
 
         <div className="group-logo">
           <button
-            className={`btn-img ${color === 1 ? "selected" : null}`}
+            className={`btn-img ${color === 2 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("LISTCHAT");
               handleSelectChat(null, "MESSAGER");
-              setColor(1);
+              setColor(2);
             }}
           >
             <img src={messager} className="img-messager" alt="messager" />
           </button>
           <button
-            className={`btn-img ${color === 2 ? "selected" : null}`}
+            className={`btn-img ${color === 3 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("PHONE");
               handleSelectChat(null, "PHONE");
-              setColor(2);
+              setColor(3);
             }}
           >
             <img src={listphone} className="img-listphone" alt="listphone" />
           </button>
           <button
-            className={`btn-img ${color === 3 ? "selected" : null}`}
+            className={`btn-img ${color === 4 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("SHORTVIDEO");
               handleSelectChat(null, "SHORTVIDEO");
-              setColor(3);
+              setColor(4);
             }}
           >
             <img src={todo} className="img-to-do" alt="todo" />
@@ -88,9 +92,10 @@ const Chat = () => {
         </div>
         <div>
           <button
-            className={`btn-img ${color === 4 ? "selected" : null}`}
+            className={`btn-img ${color === 5 ? "selected" : null}`}
             onClick={() => {
-              setColor(4);
+              handleTabChange("SETTING")
+              setColor(5);
             }}
           >
             <img src={setting} className="img-setting" alt="setting" />
@@ -104,13 +109,14 @@ const Chat = () => {
         <Listchat onSelectChat={handleSelectChat} />
       ) : currentComponent === "PHONE" ? (
         <Phone />
+      ) : currentComponent === "SHORTVIDEO" ? (
+        <ShortVideo />
       ) : (
-        currentComponent === "SHORTVIDEO" && <ShortVideo />
+        currentComponent === "SETTING" && <Setting />
       )}
 
-    
-        {currentChat && ( 
-           <div className="frame-chat">
+      {currentChat && (
+        <div className="frame-chat">
           <div className="sreen-chat">
             {/* Bar chat hien thi thong tin */}
             <div className="barr-chat">
@@ -216,9 +222,9 @@ const Chat = () => {
                 <img className="img-send-chat" src={send} alt="send" />
               </button>
             </div>
-          </div> </div>
-        )}
-     
+          </div>{" "}
+        </div>
+      )}
     </div>
   );
 };

@@ -55,7 +55,7 @@ const Infor = () => {
 
       <div className="story-infor">
         <p className="text-story">
-          Thực ra thế giới vẫn vậy chỉ có em là thay thế anh bằng người khác.
+          ???
         </p>
       </div>
 

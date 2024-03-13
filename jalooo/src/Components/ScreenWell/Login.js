@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { set } from "mongoose";
 
-const url = "http://localhost:3001/api/user";
+const url = "http://localhost:3001/api/usermongodb";
 function Login() {
   const [state, setState] = useState([]);
   const [cookies, setCookies] = useCookies();
@@ -24,7 +24,6 @@ function Login() {
       .then((res) => res.json())
       .then((data) => {
         setState(data);
-        console.log(data);
       });
   };
 
@@ -38,17 +37,21 @@ function Login() {
     }
   };
 
-  // Check mail
-  const isEmailValid = async (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Email không hợp lệ.");
-      return false;
-    }
-  
-   return true
-  };
+ // Check mail
+const isEmailValid = async (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    toast.error("Email không hợp lệ.");
+    return false;
+  }
 
+  if (!email.endsWith('@gmail.com')) {
+    toast.error("Email phải là địa chỉ Gmail.");
+    return false;
+  }
+
+  return true;
+};
 // Check password
   const isPasswordValid = (password) => {
     if (!password) {
@@ -92,7 +95,6 @@ function Login() {
       // 6. User not found: Handle user not found scenario
       // Display an error message to the user
       toast.error("Không tìm thấy mail đã đăng ký!");
-      setMail("");
       setPassword("");
     }
   }
@@ -116,6 +118,7 @@ function Login() {
             value={email}
             onChange={(event) => setMail(event.target.value)}
             className="input-email"
+            title=".... + @gmail.com"
           />
 
           <div className="group-pass-login">
@@ -124,7 +127,8 @@ function Login() {
               placeholder="Mật khẩu"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="input-pass"
+              className="input-pass" 
+              title="Password bao gồm 1 chữ cái in Hoa và 6 chữ số" 
             />
 
             <button onClick={handlePasswordVisibility} className="btn-pass-login">
