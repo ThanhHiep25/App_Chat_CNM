@@ -85,8 +85,8 @@ const Chat = () => {
           <button
             className={`btn-img ${color === 4 ? "selected" : null}`}
             onClick={() => {
-              handleTabChange("SHORTVIDEO");
-              handleSelectChat(null, "SHORTVIDEO");
+              handleTabChange("SHORT");
+              handleSelectChat(null, "SHORT");
               setColor(4);
             }}
           >
@@ -137,7 +137,7 @@ const Chat = () => {
         <Listchat onSelectChat={handleSelectChat} />
       ) : currentComponent === "PHONE" ? (
         <Phone />
-      ) : currentComponent === "SHORTVIDEO" ? (
+      ) : currentComponent === "SHORT" ? (
         <ShortVideo />
       ) : (
         currentComponent === "SETTING" && <Setting />

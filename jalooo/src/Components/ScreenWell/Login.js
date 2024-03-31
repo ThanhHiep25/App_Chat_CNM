@@ -9,8 +9,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { set } from "mongoose";
+import unseen from "../../IMG/unseen.png";
+import seen from "../../IMG/seen.png";
 
 const url = "http://localhost:3001/api/usermongodb";
+
+//const url = "https://7982d9fe-9cfa-4392-a3a5-33658b4e2511-00-pzw56jxzki3b.janeway.replit.dev/"
 function Login() {
   const [state, setState] = useState([]);
   const [cookies, setCookies] = useCookies();
@@ -37,22 +41,22 @@ function Login() {
     }
   };
 
- // Check mail
-const isEmailValid = async (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    toast.error("Email không hợp lệ.");
-    return false;
-  }
+  // Check mail
+  const isEmailValid = async (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Email không hợp lệ.");
+      return false;
+    }
 
-  if (!email.endsWith('@gmail.com')) {
-    toast.error("Email phải là địa chỉ Gmail.");
-    return false;
-  }
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Email phải là địa chỉ Gmail.");
+      return false;
+    }
 
-  return true;
-};
-// Check password
+    return true;
+  };
+  // Check password
   const isPasswordValid = (password) => {
     if (!password) {
       toast.error("Vui lòng nhập mật khẩu.");
@@ -71,33 +75,26 @@ const isEmailValid = async (email) => {
 
   const checkLogin = () => {
     const user = state.find((user) => user.email === email);
- if (isEmailValid(email) && isPasswordValid(password)) {
-    if (user) {
-      // 3. Compare the entered password with the fetched password
-      if (user.pass === password) {
-        const userWithoutPassword = { name: user.name, email: user.email };
-        // Tạo đối tượng mới chỉ chứa thông tin cần thiết
-        // 4. Login successful: Handle successful login logic here
-        setCookies("user", userWithoutPassword);
-        //sessionStorage.setItem("user", JSON.stringify(userWithoutPassword));
-        toast.success("Đăng nhập thành công!");
-        setTimeout(() => {
-           navigate("/chat");
-        }, 3000);
-        // For example, navigate to a protected route or store user data in local storage
+    if (isEmailValid(email) && isPasswordValid(password)) {
+      if (user) {
+        // 3. Compare the entered password with the fetched password
+        if (user.pass === password) {
+          const userWithoutPassword = { name: user.name, email: user.email };
+          // Tạo đối tượng mới chỉ chứa thông tin cần thiết
+          setCookies("user", userWithoutPassword);
+          toast.success("Đăng nhập thành công!");
+          setTimeout(() => {
+            navigate("/chat");
+          }, 3000);
+        } else {
+          toast.error("Sai mật khẩu!");
+          setPassword("");
+        }
       } else {
-        // 5. Incorrect password: Handle invalid password scenario
-        toast.error("Sai mật khẩu!");
+        toast.error("Không tìm thấy mail đã đăng ký!");
         setPassword("");
-        // Display an error message to the user
       }
-    } else {
-      // 6. User not found: Handle user not found scenario
-      // Display an error message to the user
-      toast.error("Không tìm thấy mail đã đăng ký!");
-      setPassword("");
     }
-  }
     document.addEventListener("keydown", handleEnterKeyPress);
   };
 
@@ -127,12 +124,22 @@ const isEmailValid = async (email) => {
               placeholder="Mật khẩu"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="input-pass" 
-              title="Password bao gồm 1 chữ cái in Hoa và 6 chữ số" 
+              className="input-pass"
+              title="Password bao gồm 1 chữ cái in Hoa và 6 chữ số"
             />
 
-            <button onClick={handlePasswordVisibility} className="btn-pass-login">
-              <p className="text-pass-login">{secureTextEntry ? "Hiện" : "Ẩn"}</p>
+            <button
+              onClick={handlePasswordVisibility}
+              className="btn-pass-login"
+            >
+              <p className="text-pass-login">
+                {" "}
+                {secureTextEntry ? (
+                  <img src={unseen} className="logo-unseen-sign" alt="unseen" />
+                ) : (
+                  <img src={seen} className="logo-unseen-sign" alt="seen" />
+                )}
+              </p>
             </button>
           </div>
 
