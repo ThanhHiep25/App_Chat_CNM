@@ -20,6 +20,7 @@
   background-color: white;
   width: 350px;
   border-radius: 5px;
+  cursor: pointer;
 }
 .btn-list:hover {
   background-color: #94979c96;
@@ -63,10 +64,12 @@
   margin-left: 20px;
   margin-top: 30px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .btn-chat1:hover {
   background-color: #d9dce086;
+  cursor: pointer;
 }
 
 .text-listfriend {

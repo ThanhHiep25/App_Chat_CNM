@@ -1,66 +1,99 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #a7efef;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #a7efef;
+  justify-content: center;
+  align-items: center;
 }
 
-
 .title-bar {
-    height: 500px;
-    width: 600px;
-    background-color: rgba(128, 128, 128, 0.479);
-    padding: 20px;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
+  height: 500px;
+  width: 600px;
+  background-color: rgba(128, 128, 128, 0.479);
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .in {
-    height: 30px;
-    width: 300px;
-    margin: 10px;
-    border-radius: 5px;
-    border: none;
-    padding: 3px;
-    padding-left: 10px;
+  height: 30px;
+  width: 300px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+  padding: 3px;
+  padding-left: 10px;
+  
+}
+
+.pab {
+    width: 265px;
+    padding-right: 45px;
 }
 
 .in-otp {
-    height: 30px;
-    width: 190px;
-    margin: 10px;
-    border-radius: 5px;
-    border: none;
-    padding: 3px;
-    padding-left: 10px;
+  height: 30px;
+  width: 190px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+  padding: 3px;
+  padding-left: 10px;
+  border-style: dashed;
 }
 
 .group-in {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .title {
-    font-size: 30px;
-    font-weight: bold;
+  font-size: 30px;
+  font-weight: bold;
 }
 
 .group-otp {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 .btn-otp {
-    height: 50px;
-    width: 90px;
-    border-radius: 5px;
-    margin: 10px;
-    border: none;
-    background-color: rgb(29, 128, 209);
+  height: 50px;
+  width: 90px;
+  border-radius: 5px;
+  margin: 10px;
+  border: none;
+  background-color: rgb(29, 128, 209);
+}
+
+.group-pass-sign {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 50px;
+}
+
+.btn-pass-sign {
+  height: 31px;
+  width: 31px;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background-color: rgba(253, 253, 253, 0);
+  position: absolute;
+  margin-left: 285px;
+  cursor: pointer;
+}
+
+.logo-unseen-sign {
+  height: 25px;
+  width: 25px;
 }
