@@ -52,12 +52,13 @@
 
 .input-pass {
     height: 30px;
-    width: 310px;
+    width: 300px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid rgb(19, 106, 156);
     font-size: 16px;
     margin-top: 20px;
+    padding-right: 50px;
 }
 
 .input-pass:hover {
@@ -80,8 +81,9 @@
   align-items: center;
   justify-content: center;
   margin-top: 20px;
-  margin-left: 10px;
-
+  margin-left: 320px;
+  position: absolute;
+  cursor: pointer;
 }
 
 /*button va textbutton*/

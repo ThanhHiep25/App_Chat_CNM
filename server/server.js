@@ -58,6 +58,7 @@ app.post("/send-otp", async (req, res) => {
 const dbName = "user_fly"; // Thay đổi tên database của bạn
 const collectionName = "user";
 
+/*
 app.get("/api/user", async (req, res) => {
   try {
     const apiResponse = await fetch(
@@ -70,7 +71,7 @@ app.get("/api/user", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
+*/
 // mongodb
 const uri = process.env.MONGO;
 
@@ -111,7 +112,7 @@ app.get("/api/usermongodb", async (req, res) => {
 
 
 app.post("/api/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, pass } = req.body;
 
   try {
     await client.connect();
@@ -131,6 +132,23 @@ app.post("/api/register", async (req, res) => {
     await client.close();
   }
 });
+
+
+// Delete user
+app.post("/api/delete", async (req, res) => {
+  const { email, name, pass } = req.body;
+  try {
+    await client.connect();
+    const database = client.db('user_fly'); // Thay 'your_database_name' bằng tên database
+    const collection = database.collection('user'); // Thay 'user' bằng tên collection.
+    const user = { email , name, pass}
+    const result = await collection.deleteOne(user);
+    res.json({ success: true, message: "Xóa thành công!" });
+  } catch (error) {
+    console.error("Error registering ", error)
+    res.status(500).json({success : false, message :"Đã có lỗi xảy ra khi xóa."})
+  }
+})
 
 
 app.listen(PORT, () => {

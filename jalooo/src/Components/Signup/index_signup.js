@@ -3,8 +3,10 @@ import "../../Css/Signup.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import unseen from "../../IMG/unseen.png";
+import seen from "../../IMG/seen.png";
 
-const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
+//const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 
 const Signup = () => {
   // API test
@@ -22,6 +24,8 @@ const Signup = () => {
   // Định nghĩa biến trạng thái để theo dõi xem OTP đã được gửi hay chưa
   const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [secureTextEntry1, setSecureTextEntry1] = useState(true);
 
   //Post signup user mockapi
   /* const Postuser = () => {
@@ -203,6 +207,14 @@ const Signup = () => {
     }
   };
 
+  const handlePasswordVisibility = () => {
+    setSecureTextEntry(!secureTextEntry);
+  };
+
+  const handlePasswordVisibility1 = () => {
+    setSecureTextEntry1(!secureTextEntry1);
+  };
+
   return (
     <div className="container">
       <ToastContainer />
@@ -210,7 +222,7 @@ const Signup = () => {
         <p className="title">Đăng ký</p>
         <div className="group-in">
           <input
-            placeholder="Ten..."
+            placeholder="Nhap Ten..."
             value={name}
             onChange={(event) => setName(event.target.value)}
             className="in"
@@ -222,20 +234,49 @@ const Signup = () => {
             onChange={(event) => setMail(event.target.value)}
             className="in"
           />
-          <input
-            type="password"
-            placeholder="Pass..."
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="in"
-          />
-          <input
-            type="password"
-            placeholder="Nhập lại pass lần nữa..."
-            value={password2}
-            onChange={(event) => setPassword2(event.target.value)}
-            className="in"
-          />
+          <div className="group-pass-sign">
+            <input
+              type={secureTextEntry ? "password" : "text"}
+              placeholder="Pass..."
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="in pab"
+            />
+            <button
+              onClick={handlePasswordVisibility}
+              className="btn-pass-sign"
+            >
+              <p className="text-pass-sign">
+                {secureTextEntry ? (
+                  <img src={unseen} className="logo-unseen-sign" alt="unseen" />
+                ) : (
+                  <img src={seen} className="logo-unseen-sign" alt="seen" />
+                )}
+              </p>
+            </button>
+          </div>
+          <div className="group-pass-sign">
+            <input
+              type={secureTextEntry1 ? "password" : "text"}
+              placeholder="Nhập lại pass lần nữa..."
+              value={password2}
+              onChange={(event) => setPassword2(event.target.value)}
+              className="in pab"
+            />
+            <button
+              onClick={handlePasswordVisibility1}
+              className="btn-pass-sign"
+            >
+              <p className="text-pass-sign">
+                {secureTextEntry1 ? (
+                  <img src={unseen} className="logo-unseen-sign" alt="unseen" />
+                ) : (
+                  <img src={seen} className="logo-unseen-sign" alt="seen" />
+                )}
+              </p>
+            </button>
+          </div>
+
           <div className="group-otp">
             {/* Thêm trường nhập OTP */}
             <input

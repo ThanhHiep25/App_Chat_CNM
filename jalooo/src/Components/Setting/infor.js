@@ -6,6 +6,7 @@ import { useCookies } from "react-cookie";
 
 import back from "../../IMG/back.png";
 import next from "../../IMG/next.png";
+import Setting_infor_Modal from "./Setting_infor_Modal";
 
 const Infor = () => {
   const [cookies, setCookies] = useCookies(["user"]);
@@ -37,6 +38,18 @@ const Infor = () => {
 
   const sliderTransformValue = `translateX(-${currentImageIndex * 50}%)`;
 
+  const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  const handleChooseLogout = () => {
+    setLogoutModalOpen(true);
+  };
+
+
+
+  const handleCloseModal = () => {
+    setLogoutModalOpen(false);
+  };
+
   return (
     <div className="infor-fr">
       <div className="bg-ig-user-infor">
@@ -50,7 +63,7 @@ const Infor = () => {
       </div>
 
       <div className="edit-infor">
-        <button className="btn-edit-infor">Chinh sua trang ca nhan</button>
+        <button className="btn-edit-infor" onClick={handleChooseLogout}>Chinh sua trang ca nhan</button>
       </div>
 
       <div className="story-infor">
@@ -84,6 +97,13 @@ const Infor = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="modal-setup-infor">
+        <Setting_infor_Modal
+          isOpen={isLogoutModalOpen}
+          onClose={handleCloseModal}
+        />
       </div>
     </div>
   );
