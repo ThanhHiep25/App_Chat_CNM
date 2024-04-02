@@ -112,7 +112,8 @@ const Chat = () => {
                 >
                   <img src={setting} className="img-setting" alt="setting" />
                 </Button>
-                <Menu {...bindMenu(popupState)}>
+                <Menu {...bindMenu(popupState)}>  
+                <MenuItem >Thong tin ca nhan</MenuItem>
                   <MenuItem
                     onClick={() => {
                       handleTabChange("SETTING");
@@ -121,9 +122,9 @@ const Chat = () => {
                       popupState.close();
                     }}
                   >
-                    Thông tin giới thiệu
+                    Dang xuat
                   </MenuItem>
-                  <MenuItem >Logout</MenuItem>
+                
                 </Menu>
               </React.Fragment>
             )}
@@ -250,7 +251,7 @@ const Chat = () => {
                 <img className="img-send-chat" src={send} alt="send" />
               </button>
             </div>
-          </div>{" "}
+          </div>
         </div>
       )}
     </div>
