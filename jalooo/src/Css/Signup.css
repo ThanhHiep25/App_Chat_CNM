@@ -8,13 +8,14 @@
 }
 
 .title-bar {
-  height: 500px;
+  height:auto;
   width: 600px;
   background-color: rgba(128, 128, 128, 0.479);
   padding: 20px;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
+  padding-bottom: 50px;
 }
 
 .in {
@@ -69,6 +70,7 @@
   margin: 10px;
   border: none;
   background-color: rgb(29, 128, 209);
+  cursor: pointer;
 }
 
 .group-pass-sign {
@@ -96,4 +98,32 @@
 .logo-unseen-sign {
   height: 25px;
   width: 25px;
+}
+
+.container-lg{
+  display: flex;
+  flex-direction: column;
+  background-color: #a7efef;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.btn-lg-signup{
+  height: 50px;
+  width: 120px;
+  border-radius: 20px;
+  margin: 10px;
+  border: none;
+  background-color: rgba(153, 204, 245, 0.719);
+  font-size: 14px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #fcfcfc;
+  cursor: pointer;
+}
+
+.btn-lg-signup:hover{
+  background-color: rgba(65, 162, 241, 0.884);
+  font-weight: bold;
+  box-shadow: 2px 2px 4px black;
 }

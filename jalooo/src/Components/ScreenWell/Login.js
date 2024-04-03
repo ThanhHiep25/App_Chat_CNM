@@ -133,7 +133,6 @@ function Login() {
               className="btn-pass-login"
             >
               <p className="text-pass-login">
-                {" "}
                 {secureTextEntry ? (
                   <img src={unseen} className="logo-unseen-sign" alt="unseen" />
                 ) : (
@@ -142,6 +141,10 @@ function Login() {
               </p>
             </button>
           </div>
+
+          <p className="fg-pass" onClick={()=>{
+            navigate("/fgpass");
+          }}>Quên mật khẩu ?</p>
 
           <button
             type="submit"
