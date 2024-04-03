@@ -26,8 +26,6 @@ const Setting = () => {
 
   return (
     <div className="setting-fr">
-      <button className="btn-setting">Giới thiệu</button>
-      <button className="btn-setting">Cài đặt</button>
       <button className="btn-setting" onClick={handleChooseLogout}>
         Đăng xuất
       </button>

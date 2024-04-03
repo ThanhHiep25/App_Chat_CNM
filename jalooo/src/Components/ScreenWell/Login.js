@@ -12,7 +12,7 @@ import { set } from "mongoose";
 import unseen from "../../IMG/unseen.png";
 import seen from "../../IMG/seen.png";
 
-const url = "http://localhost:3001/api/usermongodb";
+const url = "http://localhost:3001/api/users";
 
 //const url = "https://7982d9fe-9cfa-4392-a3a5-33658b4e2511-00-pzw56jxzki3b.janeway.replit.dev/"
 function Login() {
@@ -133,7 +133,6 @@ function Login() {
               className="btn-pass-login"
             >
               <p className="text-pass-login">
-                {" "}
                 {secureTextEntry ? (
                   <img src={unseen} className="logo-unseen-sign" alt="unseen" />
                 ) : (
@@ -142,6 +141,10 @@ function Login() {
               </p>
             </button>
           </div>
+
+          <p className="fg-pass" onClick={()=>{
+            navigate("/fgpass");
+          }}>Quên mật khẩu ?</p>
 
           <button
             type="submit"

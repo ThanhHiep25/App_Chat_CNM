@@ -15,6 +15,7 @@ const Signup = () => {
 
   const [mail, setMail] = useState("");
   const [name, setName] = useState("");
+  const [date, setDate] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [otp, setOtp] = useState(""); // Thêm state cho mã OTP
@@ -26,36 +27,6 @@ const Signup = () => {
   const navigate = useNavigate();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [secureTextEntry1, setSecureTextEntry1] = useState(true);
-
-  //Post signup user mockapi
-  /* const Postuser = () => {
-    if (password === password2) {
-      fetch(url, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          email: mail,
-          pass: password,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {});
-    }
-    setTimeout(() => {
-      navigate("/me");
-    }, 3000);
-    setMail("");
-    setName("");
-    setPassword("");
-    setPassword2("");
-    setOtp("");
-    toast.success("Đăng ký thành công!!");
-  };
-*/
 
   // POST mongodb
   const Postuser = () => {
@@ -181,7 +152,6 @@ const Signup = () => {
       }
     }
   };
-  // ... Mã khác ...
 
   // Hàm xác thực và đăng ký
   const verifyAndRegister = () => {
@@ -232,6 +202,12 @@ const Signup = () => {
             placeholder="Email..."
             value={mail}
             onChange={(event) => setMail(event.target.value)}
+            className="in"
+          />
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
             className="in"
           />
           <div className="group-pass-sign">
@@ -296,6 +272,14 @@ const Signup = () => {
           </button>
         </div>
       </div>
+      <div className="container-lg">
+        <p className="p-txt-signup">
+          Bạn đã có tài khoản? <button className="btn-lg-signup" onClick={()=>{
+            navigate('/me')
+          }}>Đăng nhập</button>
+        </p>
+      </div>
+      
     </div>
   );
 };
