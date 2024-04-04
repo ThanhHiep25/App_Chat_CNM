@@ -204,12 +204,6 @@ const Signup = () => {
             onChange={(event) => setMail(event.target.value)}
             className="in"
           />
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="in"
-          />
           <div className="group-pass-sign">
             <input
               type={secureTextEntry ? "password" : "text"}
