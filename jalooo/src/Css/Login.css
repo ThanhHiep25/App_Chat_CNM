@@ -37,42 +37,59 @@
   align-items: center;
 }
 
-.input-email {
-  height: 30px;
-  width: 350px;
-  border: 1px solid rgb(19, 106, 156);
-  border-radius: 5px;
-  padding: 5px;
-  font-size: 16px;
-  color: #757779;
+.lg-div {
+  display: flex;
+  flex-direction: column;
 }
 
-.input-email:hover{
-    box-shadow: 0px 1px 4px 2px #26bbae7e;
+.lg-m {
+  margin-top: 20px;
+}
+
+.txt-lg {
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+}
+
+.input-email {
+  width: 350px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.input-email:hover {
+  box-shadow: 0px 1px 4px 2px #26bbae7e;
 }
 
 .input-pass {
-    height: 30px;
-    width: 300px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid rgb(19, 106, 156);
-    font-size: 16px;
-    margin-top: 20px;
-    padding-right: 50px;
+  width: 300px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  padding-right: 50px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .input-pass:hover {
-    box-shadow: 0px 1px 4px 2px #26bbae7e;
+  box-shadow: 0px 1px 4px 2px #26bbae7e;
 }
 
-.group-pass-login{
+.group-pass-login {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.btn-pass-login{
+.btn-pass-login {
   height: 30px;
   width: 30px;
   border-radius: 3px;
@@ -81,55 +98,53 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
   margin-left: 320px;
   position: absolute;
+  margin-top: 10px;
   cursor: pointer;
 }
 
 /*button va textbutton*/
 .btn-sub {
-    height: 50px;
-    width: 200px;
-    margin-top: 10px;
-    border-radius: 10px;
-    border: none;
-    background-color: rgb(24, 106, 212);
+  height: 50px;
+  width: 200px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgb(24, 106, 212);
 }
 
-.btn-sub:hover{
-    background-color: rgb(24, 159, 212);
+.btn-sub:hover {
+  background-color: rgb(24, 159, 212);
 }
 
 .text-sub {
-    font-size: 14px;
-    font-weight:bold;
-    color: #ffff;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffff;
 }
 
-
 .Group-another-login {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .another-login {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 .another-login .logo-another-login {
-    height: 50px;
-    width: 50px;
+  height: 50px;
+  width: 50px;
 }
 
-.fg-pass{
+.fg-pass {
   font-size: 16px;
   cursor: pointer;
 }
 
-.fg-pass:hover{
+.fg-pass:hover {
   color: rgb(6, 55, 187);
   font-weight: bold;
-
 }

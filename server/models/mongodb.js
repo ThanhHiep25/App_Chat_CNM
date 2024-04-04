@@ -43,8 +43,20 @@ const deleteUserFromDB = async (email, name, pass) => {
   client.close();
 };
 
+// Đoạn mã cập nhật mật khẩu
+const updateUserPasswordInDB = async (email, newPassword) => {
+  const client = await connectToMongoDB();
+  const database = client.db(dbName);
+  const collection = database.collection(collectionName);
+  await collection.updateOne({ email }, { $set: { pass: newPassword } });
+  client.close();
+};
+
+
+
 module.exports = {
   getUsersFromDB,
   addUserToDB,
   deleteUserFromDB,
+  updateUserPasswordInDB,
 };

@@ -1,4 +1,4 @@
-const { getUsersFromDB, addUserToDB, deleteUserFromDB } = require("../models/mongodb");
+const { getUsersFromDB, addUserToDB, deleteUserFromDB, updateUserPasswordInDB } = require("../models/mongodb");
 const { sendOTP } = require("../models/email");
 
 // Đoạn mã để lấy dữ liệu từ cơ sở dữ liệu và trả về cho client
@@ -40,6 +40,20 @@ const registerUserHandler = async (req, res) => {
   }
 };
 
+// Đoạn mã để đặt lại mật khẩu
+const resetPasswordHandler = async (req, res) => {
+  const { email, newPassword} = req.body;
+  try {
+    // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+    await updateUserPasswordInDB(email, newPassword);
+    res.status(200).json({ success: true, message: "Đặt lại mật khẩu thành công" });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).json({ success: false, message: "Đã có lỗi xảy ra khi đặt lại mật khẩu" });
+  }
+};
+
+
 // Đoạn mã để xóa người dùng
 const deleteUserHandler = async (req, res) => {
   const { email, name, pass } = req.body;
@@ -57,5 +71,6 @@ module.exports = {
     sendOTPHandler,
     registerUserHandler,
     deleteUserHandler,
+    resetPasswordHandler,
     getUsersHandler,
   };

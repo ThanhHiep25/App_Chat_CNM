@@ -19,14 +19,14 @@
 }
 
 .in {
-  height: 30px;
   width: 300px;
-  margin: 10px;
-  border-radius: 5px;
-  border: none;
-  padding: 3px;
-  padding-left: 10px;
-  
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .pab {
@@ -78,6 +78,7 @@
   flex-direction: row;
   align-items: center;
   height: 50px;
+  margin-top: 10px;
 }
 
 .btn-pass-sign {
@@ -93,6 +94,7 @@
   position: absolute;
   margin-left: 285px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 .logo-unseen-sign {
