@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import unseen from "../../IMG/unseen.png";
 import seen from "../../IMG/seen.png";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth"; // Update import statement
+import { auth } from "../../config/firebase";
 
 const url = "http://localhost:3001/api/users";
 
@@ -21,7 +23,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-
+  
   const fechapi = async () => {
     await fetch(url)
       .then((res) => res.json())
@@ -73,26 +75,17 @@ function Login() {
   };
 
   const checkLogin = () => {
-    const user = state.find((user) => user.email === email);
     if (isEmailValid(email) && isPasswordValid(password)) {
-      if (user) {
-        // 3. Compare the entered password with the fetched password
-        if (user.pass === password) {
-          const userWithoutPassword = { name: user.name, email: user.email };
-          // Tạo đối tượng mới chỉ chứa thông tin cần thiết
-          setCookies("user", userWithoutPassword);
-          toast.success("Đăng nhập thành công!");
+      signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+      const user = auth.currentUser;
+      setCookies("user", user)
+        toast.success("Đăng nhập thành công!");
           setTimeout(() => {
-            navigate("/chat");
+            navigate("/chat",user);
+            console.log(user)
           }, 3000);
-        } else {
-          toast.error("Sai mật khẩu!");
-          setPassword("");
-        }
-      } else {
-        toast.error("Không tìm thấy mail đã đăng ký!");
-        setPassword("");
-      }
+      })    
     }
     document.addEventListener("keydown", handleEnterKeyPress);
   };

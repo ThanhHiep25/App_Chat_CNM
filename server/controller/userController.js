@@ -1,6 +1,9 @@
 const { getUsersFromDB, addUserToDB, deleteUserFromDB, updateUserPasswordInDB } = require("../models/mongodb");
 const { sendOTP } = require("../models/email");
-
+const {auth} = require("../config/firebase")
+const{ getFirestore, doc, setDoc } = require("firebase/firestore")
+const { createUserWithEmailAndPassword, updateProfile } = require("firebase/auth")
+const db = getFirestore();
 // Đoạn mã để lấy dữ liệu từ cơ sở dữ liệu và trả về cho client
 const getUsersHandler = async (req, res) => {
   try {
@@ -29,15 +32,29 @@ const sendOTPHandler = async (req, res) => {
 
 // Đoạn mã để đăng ký người dùng
 const registerUserHandler = async (req, res) => {
-  const { name, email, pass } = req.body;
+  const { name, email, pass, gender, date } = req.body;
+  const tempPhotoURL = gender === 'Nam' ? 'https://firebasestorage.googleapis.com/v0/b/demo1-14597.appspot.com/o/avatar%2Favatar_male.png?alt=media&token=c800b68c-1e1c-4660-b8a0-4dd8563cf74a' : 'https://firebasestorage.googleapis.com/v0/b/demo1-14597.appspot.com/o/avatar%2Favatar_fmale.png?alt=media&token=2301ca57-cf3d-49c2-b7bc-1bf472513dff';
+  createUserWithEmailAndPassword(auth, email, pass)
+  .then((userCredential) => {
+    updateProfile(userCredential.user, {
+      displayName: name
+    }).then(() => {
+      setDoc(doc(db, "users", userCredential.user.uid), {
+        name: name,
+        UID: userCredential.user.uid,
+        email: email,
+        gender: gender,
+        birthdate: date,
+        photoURL: tempPhotoURL
+      });
+      res.status(200).json({ success: true, message: "Đăng ký thành công" });
+    }).catch((error) => {
+      console.log("Update profile error: ", error);
+    });
 
-  try {
-    await addUserToDB({ name, email, pass });
-    res.json({ success: true, message: "Đăng ký thành công!" });
-  } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({ success: false, message: "Đã có lỗi xảy ra khi đăng ký." });
-  }
+  }).catch((error) => {
+    console.log("Update profile error: ", error);
+  });
 };
 
 // Đoạn mã để đặt lại mật khẩu
@@ -67,10 +84,15 @@ const deleteUserHandler = async (req, res) => {
   }
 };
 
+const getUserByEmailFromDB = async (email) => {
+  //truy vấn cơ sở dữ liệu và kiểm tra xem email đã tồn tại hay không
+};
+
 module.exports = {
-    sendOTPHandler,
     registerUserHandler,
     deleteUserHandler,
     resetPasswordHandler,
     getUsersHandler,
+    getUserByEmailFromDB,
+    sendOTPHandler
   };

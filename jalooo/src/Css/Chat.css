@@ -64,10 +64,19 @@
   width: 100%;
 }
 
+.message-list{
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  height: 80vh;
+  background-color: #e2e2e2b6;
+  border-radius: 5px;
+}
+
 .barr-chat {
   display: flex;
   flex-direction: row;
-  height: 80px;
+  height: 60px;
   background-color: #a4e8fd4f;
   padding: 10px;
   align-items: center;
@@ -85,7 +94,6 @@
 .sreen-chat {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   height: 95%;
 }
 
@@ -143,7 +151,17 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
+  height: 70px;
 }
+
+.modalOverlay-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 
 .input-chat {
   height: 30px;
@@ -165,6 +183,7 @@
 .img-upload {
   height: 30px;
   width: 30px;
+  cursor: pointer;
 }
 
 .btn-send {

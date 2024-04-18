@@ -53,7 +53,6 @@ const updateUserPasswordInDB = async (email, newPassword) => {
 };
 
 
-
 module.exports = {
   getUsersFromDB,
   addUserToDB,

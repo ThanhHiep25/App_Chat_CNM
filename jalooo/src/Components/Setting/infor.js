@@ -44,8 +44,6 @@ const Infor = () => {
     setLogoutModalOpen(true);
   };
 
-
-
   const handleCloseModal = () => {
     setLogoutModalOpen(false);
   };
@@ -63,25 +61,34 @@ const Infor = () => {
       </div>
 
       <div className="edit-infor">
-        <button className="btn-edit-infor" onClick={handleChooseLogout}>Chinh sua trang ca nhan</button>
+        <button className="btn-edit-infor" onClick={handleChooseLogout}>
+          Chinh sua trang ca nhan
+        </button>
+      </div>
+
+      <div className="infor-inf">
+       
+        <p className="txt-inf">Ngày sinh : <span className="spa-inf">{cookies.user.date}</span></p>
+        <p className="txt-inf">Giới tính : <span className="spa-inf gt">{cookies.user.gender}</span></p> 
+        <p className="txt-inf">Email : <span className="spa-inf mail">{cookies.user.email}</span></p>
       </div>
 
       <div className="story-infor">
-        <p className="text-story">
-          ???
-        </p>
+        <p className="text-story">Hello ngày mới 🍃</p>
       </div>
 
       <div className="slider-set-fr">
         <div className="slider-container">
-        <div
+          <div
             className="slider-wrapper"
             style={{ transform: sliderTransformValue }}
           >
             {images.map((image, index) => (
               <img
                 key={index}
-                className={`slider-image ${index === currentImageIndex ? 'active' : ''}`}
+                className={`slider-image ${
+                  index === currentImageIndex ? "active" : ""
+                }`}
                 src={image}
                 alt={`Image${index + 1}`}
                 onClick={() => handleJumpToImage(index)}
@@ -90,10 +97,10 @@ const Infor = () => {
           </div>
           <div className="btn-fr-infor">
             <button className="btn-slider" onClick={handlePrevImage}>
-              <img src={back} className="ing-next-back" alt="back.png"/>
+              <img src={back} className="ing-next-back" alt="back.png" />
             </button>
             <button className="btn-slider" onClick={handleNextImage}>
-            <img src={next} className="ing-next-back" alt="next.png"/>
+              <img src={next} className="ing-next-back" alt="next.png" />
             </button>
           </div>
         </div>

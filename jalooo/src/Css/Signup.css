@@ -18,6 +18,12 @@
   padding-bottom: 50px;
 }
 
+.sg-div{
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
 .in {
   width: 300px;
   height: 30px;
@@ -45,6 +51,11 @@
   border-style: dashed;
 }
 
+.gender{
+  width: 320px;
+  height: 50px;
+}
+
 .group-in {
   display: flex;
   flex-direction: column;
@@ -62,6 +73,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  margin-top: 30px;
 }
 .btn-otp {
   height: 50px;

@@ -10,17 +10,23 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 
 app.use(bodyParser.json());
-const session = require('express-session');
+const session = require("express-session");
 
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
-
-
-const { sendOTPHandler, registerUserHandler, deleteUserHandler, resetPasswordHandler, getUsersHandler } = require("./controller/userController");
+const {
+  sendOTPHandler,
+  registerUserHandler,
+  deleteUserHandler,
+  resetPasswordHandler,
+  getUsersHandler,
+} = require("./controller/userController");
 
 // Middleware để ghi log vào file
 const { loggerMiddleware } = require("./middlewares/loggerMiddleware");
@@ -38,7 +44,7 @@ app.post("/api/delete", deleteUserHandler);
 // Route để đặt lại mật khẩu
 app.post("/reset-password", resetPasswordHandler);
 
-// Thêm route để lấy dữ liệu từ cơ sở dữ liệu MongoDB
+// Route để lấy dữ liệu từ cơ sở dữ liệu MongoDB
 app.get("/api/users", getUsersHandler);
 
 // Start server

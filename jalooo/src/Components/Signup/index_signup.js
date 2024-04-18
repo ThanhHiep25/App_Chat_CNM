@@ -5,17 +5,19 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import unseen from "../../IMG/unseen.png";
 import seen from "../../IMG/seen.png";
-
+import { auth } from "../../config/firebase";
+import { useCookies } from "react-cookie";
 //const url = "https://65557a0784b36e3a431dc70d.mockapi.io/user";
 
 const Signup = () => {
   // API test
 
   //
-
+  const [cookies, setCookies] = useCookies();
   const [mail, setMail] = useState("");
   const [name, setName] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState("2000-01-01");
+  const [gender, setGender] = useState("Nam");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [otp, setOtp] = useState(""); // Thêm state cho mã OTP
@@ -27,6 +29,11 @@ const Signup = () => {
   const navigate = useNavigate();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [secureTextEntry1, setSecureTextEntry1] = useState(true);
+
+  const convertDateFormat = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`;
+  };
 
   // POST mongodb
   const Postuser = () => {
@@ -40,6 +47,8 @@ const Signup = () => {
         body: JSON.stringify({
           name: name,
           email: mail,
+          date: convertDateFormat(date),
+          gender: gender,
           pass: password,
         }),
       })
@@ -52,9 +61,9 @@ const Signup = () => {
             }, 3000);
             setMail("");
             setName("");
+            setDate("");
             setPassword("");
             setPassword2("");
-            setOtp("");
             // Thực hiện các thao tác sau khi đăng ký thành công (chuyển hướng, làm mới trang, vv.)
           } else {
             toast.error(data.message);
@@ -102,7 +111,7 @@ const Signup = () => {
     return true;
   };
 
-  // Hàm gửi OTP qua email
+  //Hàm gửi OTP qua email
   const sendOTP = async () => {
     if (isNameValid(name) && isEmailValid(mail) && isPasswordValid(password)) {
       try {
@@ -153,29 +162,53 @@ const Signup = () => {
     }
   };
 
-  // Hàm xác thực và đăng ký
-  const verifyAndRegister = () => {
-    // Kiểm tra tất cả các trường dữ liệu
-    if (isNameValid(name) && isEmailValid(mail) && isPasswordValid(password)) {
-      if (otp) {
-        // Kiểm tra xem mã OTP nhập vào có khớp với mã OTP được tạo ra hay không
-        if (Number(otp) === Number(generatedOTP)) {
-          // Nếu mã OTP đúng, tiến hành đăng ký
-          setIsVerified(true);
-          Postuser();
-          // Thêm phần logic đăng ký ở đây (có thể gọi hàm Postuser)
-          setTimeout(() => {
-            window.location.reload();
-          }, 8000);
-        } else {
-          setIsVerified(false);
-          toast.error("Mã OTP không hợp lệ!");
-        }
-      } else {
-        toast.error("Vui lòng nhập mã OTP.");
-      }
+  // Hàm kiểm tra tuổi từ ngày sinh
+  const isAgeValid = async (date) => {
+    let today = new Date();
+    let birthDate = new Date(date);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    let monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    if (age < 18) {
+      toast.error("Bạn phải đủ 18 tuổi trở lên để đăng ký.");
+      return false;
+    } else {
+      return true;
     }
   };
+
+ // Hàm xác thực và đăng ký
+ const verifyAndRegister = async () => {
+  // Kiểm tra tất cả các trường dữ liệu
+  if (
+    isNameValid(name) &&
+    isEmailValid(mail) &&
+    (await isAgeValid(date)) &&
+    isPasswordValid(password)
+  ) {
+    if (otp) {
+      // Kiểm tra xem mã OTP nhập vào có khớp với mã OTP được tạo ra hay không
+      if (Number(otp) === Number(generatedOTP)) {
+        // Nếu mã OTP đúng, tiến hành đăng ký
+        setIsVerified(true);
+        Postuser();
+        setTimeout(() => {
+          window.location.reload();
+        }, 8000);
+      } else {
+        setIsVerified(false);
+        toast.error("Mã OTP không hợp lệ!");
+      }
+    } else {
+      toast.error("Vui lòng nhập mã OTP.");
+    }
+  }
+};
 
   const handlePasswordVisibility = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -191,64 +224,105 @@ const Signup = () => {
       <div className="title-bar">
         <p className="title">Đăng ký</p>
         <div className="group-in">
-          <input
-            placeholder="Nhap Ten..."
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="in"
-          />
-          <input
-            type="email"
-            placeholder="Email..."
-            value={mail}
-            onChange={(event) => setMail(event.target.value)}
-            className="in"
-          />
-          <div className="group-pass-sign">
+          <div className="sg-div">
+            <label>Nhập tên</label>
             <input
-              type={secureTextEntry ? "password" : "text"}
-              placeholder="Pass..."
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="in pab"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="in"
             />
-            <button
-              onClick={handlePasswordVisibility}
-              className="btn-pass-sign"
-            >
-              <p className="text-pass-sign">
-                {secureTextEntry ? (
-                  <img src={unseen} className="logo-unseen-sign" alt="unseen" />
-                ) : (
-                  <img src={seen} className="logo-unseen-sign" alt="seen" />
-                )}
-              </p>
-            </button>
-          </div>
-          <div className="group-pass-sign">
-            <input
-              type={secureTextEntry1 ? "password" : "text"}
-              placeholder="Nhập lại pass lần nữa..."
-              value={password2}
-              onChange={(event) => setPassword2(event.target.value)}
-              className="in pab"
-            />
-            <button
-              onClick={handlePasswordVisibility1}
-              className="btn-pass-sign"
-            >
-              <p className="text-pass-sign">
-                {secureTextEntry1 ? (
-                  <img src={unseen} className="logo-unseen-sign" alt="unseen" />
-                ) : (
-                  <img src={seen} className="logo-unseen-sign" alt="seen" />
-                )}
-              </p>
-            </button>
           </div>
 
+          <div className="sg-div">
+            <label>Email</label>
+            <input
+              type="email"
+              value={mail}
+              onChange={(event) => setMail(event.target.value)}
+              className="in"
+            />
+          </div>
+
+          <div className="sg-div">
+            <label>Ngày sinh</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              className="in"
+            />
+          </div>
+
+          <div className="sg-div">
+            <label>Giới tính</label>
+            <select
+              className="in gender"
+              value={gender}
+              onChange={(event) => setGender(event.target.value)}
+            >
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </div>
+
+          <div className="sg-div">
+            <label>Mật khẩu</label>
+            <div className="group-pass-sign">
+              <input
+                type={secureTextEntry ? "password" : "text"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="in pab"
+              />
+              <button
+                onClick={handlePasswordVisibility}
+                className="btn-pass-sign"
+              >
+                <p className="text-pass-sign">
+                  {secureTextEntry ? (
+                    <img
+                      src={unseen}
+                      className="logo-unseen-sign"
+                      alt="unseen"
+                    />
+                  ) : (
+                    <img src={seen} className="logo-unseen-sign" alt="seen" />
+                  )}
+                </p>
+              </button>
+            </div>
+          </div>
+
+          <div className="sg-div">
+            <label>Nhập lại mật khẩu</label>
+            <div className="group-pass-sign">
+              <input
+                type={secureTextEntry1 ? "password" : "text"}
+                value={password2}
+                onChange={(event) => setPassword2(event.target.value)}
+                className="in pab"
+              />
+              <button
+                onClick={handlePasswordVisibility1}
+                className="btn-pass-sign"
+              >
+                <p className="text-pass-sign">
+                  {secureTextEntry1 ? (
+                    <img
+                      src={unseen}
+                      className="logo-unseen-sign"
+                      alt="unseen"
+                    />
+                  ) : (
+                    <img src={seen} className="logo-unseen-sign" alt="seen" />
+                  )}
+                </p>
+              </button>
+            </div>
+          </div>
+
+         
           <div className="group-otp">
-            {/* Thêm trường nhập OTP */}
             <input
               type="text"
               placeholder="Nhập mã OTP..."
@@ -268,12 +342,17 @@ const Signup = () => {
       </div>
       <div className="container-lg">
         <p className="p-txt-signup">
-          Bạn đã có tài khoản? <button className="btn-lg-signup" onClick={()=>{
-            navigate('/me')
-          }}>Đăng nhập</button>
+          Bạn đã có tài khoản?{" "}
+          <button
+            className="btn-lg-signup"
+            onClick={() => {
+              navigate("/me");
+            }}
+          >
+            Đăng nhập
+          </button>
         </p>
       </div>
-      
     </div>
   );
 };

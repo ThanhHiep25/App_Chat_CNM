@@ -25,6 +25,29 @@
   border: 1px solid black;
 }
 
+.infor-inf{
+ margin: 20px;
+ margin-left: 20%;
+}
+
+.txt-inf{
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.spa-inf{
+  margin-left: 20px;
+}
+
+.gt{
+  margin-left: 30px;
+}
+
+.mail{
+  margin-left: 50px;
+}
+
 .text-infor {
   position: relative;
   font-size: 25px;
