@@ -149,10 +149,12 @@ const Chat = () => {
               }
             });
             setMessages(messages);
+            const photoUrl = friendData.Photo_group ? friendData.Photo_group : otherUser.photoURL;
+            const displayName = friendData.Name_group ? friendData.Name_group : otherUser.name;
             setCurrentChat({
-              photoUrl: otherUser.photoURL,
-              displayName: otherUser.name,
-              messages: messages,
+                photoUrl: photoUrl,
+                displayName: displayName,
+                messages: messages,
             });
             console.log("danh sach tin nhan", messages);
             console.log("danh sach tin nhan", photoURL);
@@ -198,53 +200,7 @@ const Chat = () => {
     setShow(true);
   };
 
-  const onSend = useCallback(
-    async (messages = []) => {
-      const messageToSend = messages[0];
-      if (!messageToSend) {
-        return;
-      }
-
-      const { _id, createdAt, text, user, image, video, document } =
-        messageToSend;
-      console.log(document, "document");
-      const chatRoomId = roomID;
-      const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
-
-      try {
-        let imageDownloadURL = null;
-        let videoDownloadURL = null;
-        let documentDownloadURL = null;
-        let imageContentType = null;
-        let videoContentType = null;
-        let documentContentType = null;
-
-        if (document) {
-          documentContentType = ""; // assuming you have a function getFileType to determine content type
-          documentDownloadURL = await uploadFileToFirebaseStorage(
-            document,
-            userId?.uid
-          );
-        }
-
-        await addDoc(chatMessRef, {
-          _id,
-          createdAt,
-          text: text || "",
-          user,
-          image: imageDownloadURL,
-          video: videoDownloadURL,
-          document: documentDownloadURL,
-          imageContentType,
-          videoContentType,
-          documentContentType,
-        });
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-    },
-    [db, roomID]
-  );
+ 
 
   const handleTabChange = (tab) => {
     setCurrentComponent(tab);
@@ -346,7 +302,7 @@ const Chat = () => {
                   marginLeft: "10px",
                 }}
               >
-                {friendData.name}
+                {props.currentMessage.user.name}
               </p>
             )}
             <div
@@ -387,7 +343,7 @@ const Chat = () => {
                   <img
                     src={props.currentMessage.image}
                     style={{
-                      width: "150px",
+                      width: "250px",
                       height: "200px",
                       borderRadius: "10px",
                     }}
@@ -444,31 +400,97 @@ const Chat = () => {
     );
   };
 
-  // File upload progress
+  const onSend = useCallback(
+    async (messages = []) => {
+      const messageToSend = messages[0];
+      if (!messageToSend) {
+        return;
+      }
+
+      const { _id, createdAt, text, user, image, video, document } =
+        messageToSend;
+      console.log(document, "document");
+      const chatRoomId = roomID;
+      const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
+
+      try {
+        let imageDownloadURL = null;
+        let videoDownloadURL = null;
+        let documentDownloadURL = null;
+        let imageContentType = null;
+        let videoContentType = null;
+        let documentContentType = null;
+
+        if (image) {
+          imageContentType = 'image/jpeg'; // assuming image is always jpeg for simplicity
+          imageDownloadURL = await uploadFileToFirebaseStorage(image,
+            userId?.uid, imageContentType);
+        }
+        if (video) {
+          videoContentType = 'video/mp4'; // assuming video is always mp4 for simplicity
+          videoDownloadURL = await uploadFileToFirebaseStorage(video,
+            userId?.uid, videoContentType);
+        }
+        if (document) {
+          documentContentType = ""; // assuming you have a function getFileType to determine content type
+          documentDownloadURL = await uploadFileToFirebaseStorage(
+            document,
+            userId?.uid
+          );
+        }
+
+        await addDoc(chatMessRef, {
+          _id,
+          createdAt,
+          text: text || "",
+          user,
+          image: imageDownloadURL,
+          video: videoDownloadURL,
+          document: documentDownloadURL,
+          imageContentType,
+          videoContentType,
+          documentContentType,
+        });
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    },
+    [db, roomID]
+  );
+
   const uploadFileToFirebaseStorage = async (file, uid, contentType) => {
     try {
-      const response = await fetch(file);
-      const blob = await response.blob();
+        const response = await fetch(file);
+        const blob = await response.blob();
 
-      // Tạo tham chiếu con trong Firebase Storage với đường dẫn phù hợp với luật an toàn
-      const storageRef = ref(
-        storage,
-        `photos/${uid}/${new Date().getTime()}/${file.name}`
-      );
+        let storagePath = ''; // Initialize storage path variable
 
-      // Thực hiện tải lên tệp
-      await uploadBytes(storageRef, blob);
-      console.log("Upload complete");
+        // Determine storage path based on file type
+        if (contentType === 'image') {
+            storagePath = `images/${uid}/${new Date().getTime()}/${file.name}`;
+        } else if (contentType === 'video') {
+            storagePath = `videos/${uid}/${new Date().getTime()}/${file.name}`;
+        } else {
+            storagePath = `documents/${uid}/${new Date().getTime()}`;
+        }
 
-      // Lấy URL tải xuống của tệp
-      const downloadURL = await getDownloadURL(storageRef);
-      console.log(downloadURL, "downloadURL");
-      return downloadURL;
+        // Create a reference to the appropriate location in Firebase Storage
+        const storageRef = ref(storage, storagePath); // Make sure `storage` is referencing the root of your storage bucket
+
+        // Upload the file to Firebase Storage
+        await uploadBytes(storageRef, blob);
+        console.log("Upload complete");
+
+        // Get the download URL of the uploaded file
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log(downloadURL, "downloadURL");
+        return downloadURL;
     } catch (error) {
-      console.error("Error uploading file:", error);
-      throw error;
+        console.error("Error uploading file:", error);
+        throw error;
     }
-  };
+};
+
 
   // Ref to the chat messages container
   const chatMessagesRef = useRef(null);
@@ -487,7 +509,7 @@ const Chat = () => {
 
   // Hàm xử lý khi người dùng chọn tệp tin
 
-  // const handleImageUpload = async (event) => {
+  // const handlelPickup = async (event) => {
   //   const file = event.target.files[0];
   //   const fileRef = storage.ref().child(`images/${file.name}`);
 
@@ -515,17 +537,26 @@ const Chat = () => {
   //   }
   // };
 
-  const handleImageUpload = (event) => {
+  const handlelPickup = (event) => {
     const file = event.target.files[0];
     const fileURL = URL.createObjectURL(file);
     console.log("da chon file", fileURL);
     const text = file.name;
 
-    // Sử dụng storage thay vì storage.ref
-    const storageRef = ref(
-      storage,
-      `photos/${userId.uid}/${new Date().getTime()}/${file.name}`
-    );
+    // Get the file extension
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+
+    // Check the file extension to determine its type
+    let documentType;
+    if (['pdf', 'doc', 'docx', 'txt'].includes(fileExtension)) {
+        documentType = 'document';
+    } else if (['mp4', 'avi', 'mov'].includes(fileExtension)) {
+        documentType = 'video';
+    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+        documentType = 'image';
+    } else {
+        documentType = 'unknown';
+    }
 
     onSend([
       {
@@ -536,89 +567,82 @@ const Chat = () => {
           avatar: userData?.photoURL || "default_avatar_url",
         },
         text: text,
-        document: fileURL,
+        document: documentType === 'document' ? fileURL : null,
+        video: documentType === 'video' ? fileURL : null,
+        image: documentType === 'image' ? fileURL : null,
       },
     ]);
-  };
+};
 
-  const handleDelete = async (message) => {
-    try {
-      const chatRoomId = [userId?.uid, friendData?.UID].sort().join("_");
-      const chatMessRef = doc(
-        db,
-        "Chats",
-        chatRoomId,
-        "chat_mess",
-        message._id
-      );
-      await deleteDoc(chatMessRef);
-      console.log("Message deleted successfully");
-    } catch (error) {
-      console.error("Error deleting message:", error);
-    }
-  };
 
-  const handleRecall = async (message) => {
-    try {
-      if (forwardedUser) {
-        const forwardedMessage = {
-          _id: Math.random().toString(),
-          createdAt: new Date(),
-          text: message.text,
-          user: {
-            _id: forwardedUser.UID,
-            name: forwardedUser.name,
-            avatar: forwardedUser.photoUrl || "default_avatar_url",
-          },
-        };
+ 
+const handleDelete = async (message) => {
+  try {
+    const chatMessRef = doc(db, "Chats", roomID, "chat_mess", message._id);
+    await deleteDoc(chatMessRef);
+    console.log("Message deleted successfully");
+  } catch (error) {
+    console.error("Error deleting message:", error);
+  }
+};
 
-        const chatRoomId = [userId?.uid, forwardedUser.UID].sort().join("_");
-        const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
-        await addDoc(chatMessRef, forwardedMessage);
 
-        console.log("Message forwarded successfully");
-      } else {
-        console.log("No user selected for forwarding");
-      }
-    } catch (error) {
-      console.error("Error forwarding message:", error);
-    }
-  };
+const handleRecall = async (message) => {
+  try {
+    const chatRoomId = roomID;
+    const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
 
-  const handleReply = (message) => {
-    if (friendData) {
-      // Tạo nội dung tin nhắn trả lời
-      const replyMessage = `@${friendData.name} ${message.text} : `;
-      // Set giá trị của inputSend
-      setInputSend(replyMessage);
-    }
-  };
+    // Xóa tin nhắn khỏi cơ sở dữ liệu bằng cách cập nhật trạng thái của nó
+    await updateDoc(doc(chatMessRef, message._id), {
+      text: "Đã thu hồi tin nhắn",
+      document:"",
+    });
 
-  const handleForward = async (message) => {
-    try {
-      // Tạo một tin nhắn mới với nội dung được chuyển tiếp
-      const forwardedMessage = {
-        _id: Math.random().toString(), // ID mới cho tin nhắn
-        createdAt: new Date(), // Thời gian tạo mới
-        text: message.text, // Nội dung tin nhắn được chuyển tiếp
-        user: {
-          // Thông tin người gửi tin nhắn
-          _id: userId?.uid, // ID người gửi tin
-          name: userData?.name || "Unknown User", // Tên người gửi tin
-          avatar: userData?.photoURL || "default_avatar_url", // Avatar người gửi tin
-        },
-      };
+    console.log("Message recalled successfully");
+  } catch (error) {
+    console.error("Error recalling message:", error);
+  }
+};
 
-      // Thêm tin nhắn đã chuyển tiếp vào cơ sở dữ liệu
-      const chatRoomId = [userId?.uid, friendData?.UID].sort().join("_");
-      const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
-      await addDoc(chatMessRef, forwardedMessage);
+const handleReply = (message) => {
+  if (message.user && message.user.name) {
+    // Lấy tên người gửi từ tin nhắn
+    const senderName = message.user.name;
+    // Tạo nội dung tin nhắn trả lời với tên người gửi
+    const replyMessage = `@${senderName} ${message.text} : `;
+    // Đặt giá trị của inputSend
+    setInputSend(replyMessage);
+  }
+};
 
-      console.log("Message forwarded successfully");
-    } catch (error) {
-      console.error("Error forwarding message:", error);
-    }
-  };
+
+// Hàm để xử lý chuyển tiếp tin nhắn và đóng popup
+const handleForward = async (message, receiver) => {
+  try {
+    // Tạo tin nhắn được chuyển tiếp với người nhận được chỉ định
+    const forwardedMessage = {
+      _id: Math.random().toString(),
+      createdAt: new Date(),
+      text: message.text,
+      user: {
+        _id: userId?.uid,
+        name: userData?.name || "Unknown User",
+        avatar: userData?.photoURL || "default_avatar_url",
+      },
+    };
+
+    // Thêm tin nhắn đã chuyển tiếp vào cơ sở dữ liệu của người nhận
+    const chatRoomId = [userId?.uid, receiver.uid].sort().join("_");
+    const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
+    await addDoc(chatMessRef, forwardedMessage);
+
+    console.log("Message forwarded successfully");
+    
+    
+  } catch (error) {
+    console.error("Error forwarding message:", error);
+  }
+};
 
   return (
     <div className="App-chat">
@@ -760,14 +784,7 @@ const Chat = () => {
                       }`}
                     >
                       {/* Kiểm tra xem tin nhắn có chứa hình ảnh không */}
-                      {message.image ? (
-                        <img
-                          src={currentChat.message}
-                          alt="Uploaded image"
-                          style={{ maxWidth: "100%", height: "auto" }}
-                        />
-                      ) : (
-                        // Nếu không có hình ảnh, sử dụng hàm renderMessage
+                      {
                         renderMessage({
                           currentMessage: message,
                           previousMessage:
@@ -777,7 +794,7 @@ const Chat = () => {
                                 ]
                               : null,
                         })
-                      )}
+                      }
                     </div>
                   ))
               ) : (
@@ -805,7 +822,7 @@ const Chat = () => {
                 type="file"
                 ref={fileInputRef}
                 style={{ display: "none" }}
-                onChange={handleImageUpload}
+                onChange={handlelPickup}
               />
 
               <input

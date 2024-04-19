@@ -33,11 +33,16 @@ import Checkbox from "@mui/material/Checkbox";
 import SearchList from "./SearchList";
 import Searchuser from "./Searchuser";
 import { getAuth } from "firebase/auth";
+import { useCookies } from "react-cookie";
+import { format } from 'timeago.js';
+
 
 const Listchat = ({ onSelectChat, userId, navigation }) => {
   const db = getFirestore();
   const auth = getAuth();
   const user = auth.currentUser;
+  const [cookies, setCookies] = useCookies(["user"]);
+  const userId2 = cookies.user;
   const [list, setList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,11 +51,12 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
   const [showUserList, setShowUserList] = useState(true); // Mặc định hiển thị danh sách
   const [ID_room1, setID_room1] = useState("");
 
+
   useEffect(() => {
     const chatsCollectionRef = collection(db, "Chats");
     const chatsQuery = query(
       chatsCollectionRef,
-      where("UID", "array-contains", user.uid)
+      where("UID", "array-contains",userId2.uid)
     );
     const unsubscribeChats = onSnapshot(chatsQuery, (snapshot) => {
       const chatsMap = new Map();
@@ -58,7 +64,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
       snapshot.docs.forEach(async (chatDoc) => {
         const chatData = chatDoc.data();
         setID_room1(chatData.ID_roomChat);
-        const chatUIDs = chatData.UID.filter((uid) => uid !== user.uid);
+        const chatUIDs = chatData.UID.filter((uid) => uid !== userId2.uid);
         const otherUID = chatUIDs[0];
         const userDocRef = doc(db, "users", otherUID);
         const userDocSnap = await getDoc(userDocRef);
@@ -75,7 +81,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
             }
             // Kiểm tra xem có thông tin về thời gian xóa mới nhất không
             const detailDeleteArray = chatData.detailDelete || [];
-            console.log(user.uid, "ddd");
+            console.log(userId2.uid, "ddd");
             const latestDeleteTime = detailDeleteArray.reduce(
               (latest, detail) => {
                 if (
@@ -129,6 +135,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
     };
   }, [db, user]);
 
+
   // Khi người dùng bắt đầu nhập từ khóa tìm kiếm, ẩn danh sách người dùng
   const handleSearchInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -145,12 +152,6 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
     );
   };
   
-
-  const generateRandomId = () => {
-    const min = 100000;
-    const max = 999999;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
 
   const handleChatSelection = async (user) => {  
       onSelectChat(user,{user:user.otherUser},user.ID_room);
@@ -201,21 +202,22 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
           chats.map((user) => (
             <ul className={`ul-set`} key={user.id}>
               <li className="li-set">
-                <ChatItem
+              <ChatItem
                   avatar={
-                    user.Photo_group
-                      ? user.Photo_group
-                      : user.otherUser.photoURL && user.otherUser.photoURL
+                      user.Photo_group
+                          ? user.Photo_group
+                          : user.otherUser.photoURL && user.otherUser.photoURL
                   }
                   alt={"Reactjs"}
                   title={
-                    user.Name_group ? user.Name_group : user.otherUser.name
+                      user.Name_group ? user.Name_group : user.otherUser.name
                   }
                   subtitle={user.latestMessage && user.latestMessage.text}
-                  date={new Date()}
+                  // date={user.latestMessage.createdAt.toDate()} // Convert Firestore Timestamp to JavaScript Date
                   unread={0}
                   onClick={() => handleChatSelection(user)}
-                />
+              />
+
               </li>
             </ul>
           ))}

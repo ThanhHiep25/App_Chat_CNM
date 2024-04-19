@@ -10,7 +10,10 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import unseen from "../../IMG/unseen.png";
 import seen from "../../IMG/seen.png";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth"; // Update import statement
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth"; // Update import statement
 import { auth } from "../../config/firebase";
 
 const url = "http://localhost:3001/api/users";
@@ -23,7 +26,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  
+
   const fechapi = async () => {
     await fetch(url)
       .then((res) => res.json())
@@ -77,18 +80,30 @@ function Login() {
   const checkLogin = () => {
     if (isEmailValid(email) && isPasswordValid(password)) {
       signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-      const user = auth.currentUser;
-      setCookies("user", user)
-        toast.success("Đăng nhập thành công!");
-          setTimeout(() => {
-            navigate("/chat",user);
-            console.log(user)
-          }, 3000);
-      })    
+        .then((userCredential) => {
+          const user = userCredential.user;
+  
+          if (user) {
+            // Tạo đối tượng mới chỉ chứa thông tin cần thiết
+            setCookies("user", user);
+            toast.success("Đăng nhập thành công!");
+            setTimeout(() => {
+              navigate("/chat");
+            }, 3000);
+          } else {
+            toast.error("Không tìm thấy mail đã đăng ký!");
+            setPassword("");
+          }
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          toast.error(errorMessage);
+        });
     }
     document.addEventListener("keydown", handleEnterKeyPress);
   };
+  
 
   const handlePasswordVisibility = () => {
     setSecureTextEntry(!secureTextEntry);
