@@ -7,11 +7,12 @@ import make_friend from "../../IMG/make_friend.png";
 import "../../Css/ListPhone.css";
 import { useNavigate } from "react-router-dom";
 import ListPhone from "./ListPhone";
-import ListFen from "./ListGroup";
 import Friendrequest from "./Friendrequest";
+import ListGroup from "./ListGroup";
 
 const Phone = () => {
   const [currentComponent, setCurrentComponent] = useState(null);
+  const [color, setColor] = useState(0);
 
   const handleTabChange = (tab) => {
     setCurrentComponent(tab);
@@ -23,9 +24,10 @@ const Phone = () => {
         <div className="bar-chat"></div>
         <div className="list-friend">
           <button
-            className="btn-list"
+            className={`btn-list ${color === 1 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("LISTPHONE");
+              setColor(1);
             }}
           >
             <img src={list_friend} className="img-list" alt="List fen" />
@@ -34,9 +36,10 @@ const Phone = () => {
         </div>
         <div className="list-friend">
           <button
-            className="btn-list"
+            className={`btn-list ${color === 2 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("LISTG");
+              setColor(2)
             }}
           >
             <img src={list_group} className="img-list" alt="List group" />
@@ -45,9 +48,10 @@ const Phone = () => {
         </div>
         <div className="list-friend">
           <button
-            className="btn-list"
+            className={`btn-list ${color === 3 ? "selected" : null}`}
             onClick={() => {
               handleTabChange("FENRS");
+              setColor(3);
             }}
           >
             <img
@@ -62,7 +66,7 @@ const Phone = () => {
       {currentComponent === "LISTPHONE" ? (
         <ListPhone />
       ) : currentComponent === "LISTG" ? (
-        <ListFen />
+        <ListGroup />
       ) : (
         currentComponent === "FENRS" && <Friendrequest />
       )}

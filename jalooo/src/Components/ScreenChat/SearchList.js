@@ -413,7 +413,6 @@ const SearchList = ({ open, handleClose }) => {
                         avatar={user.photoUrl}
                         alt={"Reactjs"}
                         title={user.name}
-                        subtitle={"What are you doing?"}
                         date={new Date()}
                         unread={0}
                       />
@@ -447,7 +446,6 @@ const SearchList = ({ open, handleClose }) => {
                         avatar={user.photoUrl}
                         alt={"Reactjs"}
                         title={user.name}
-                        subtitle={"What are you doing?"}
                         date={new Date()}
                         unread={0}
                       />

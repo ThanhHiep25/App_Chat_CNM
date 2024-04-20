@@ -43,13 +43,16 @@
 }
 
 .ul-set {
+  display: flex;
   list-style: none;
   margin-left: -40px;
 }
 
-.li-set {
-  margin-top: -15px;
+.li-set{
+  background-color: aqua;
+  width: 100%;
 }
+
 /* Custom chat user */
 .Logo-user {
   height: 40px;
@@ -98,6 +101,15 @@
   cursor: pointer;
 }
 
+.st{
+  background-color: rgba(193, 245, 245, 0.699);
+  border: none;
+}
+
+.status{
+  background-color: aqua;
+  border: none;
+}
 
 .img-add{
   height: 24px;

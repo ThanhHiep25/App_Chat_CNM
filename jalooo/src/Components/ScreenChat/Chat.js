@@ -49,6 +49,7 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import SendIcon from "@mui/icons-material/Send";
 import DuoOutlinedIcon from "@mui/icons-material/DuoOutlined";
 import AutoAwesomeMosaicOutlinedIcon from "@mui/icons-material/AutoAwesomeMosaicOutlined";
+import { getAuth } from "firebase/auth";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -72,6 +73,7 @@ const Chat = () => {
   const [forwardedUser, setForwardedUser] = useState(null);
   const [roomID, setRoomID] = useState("");
   const [otherUser, setOrtherUser] = useState("");
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -95,12 +97,10 @@ const Chat = () => {
   }, [db, userId.uid]);
 
   const handleSelectChat = async (chatInfo, User, Room) => {
-    setFriendData(chatInfo); 
+    setFriendData(chatInfo);
+    setOrtherUser(User);
     setRoomID(Room);
-    setOrtherUser(User.user);
   };
-
-  
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -149,12 +149,16 @@ const Chat = () => {
               }
             });
             setMessages(messages);
-            const photoUrl = friendData.Photo_group ? friendData.Photo_group : otherUser.photoURL;
-            const displayName = friendData.Name_group ? friendData.Name_group : otherUser.name;
+            const photoUrl = friendData.Photo_group
+              ? friendData.Photo_group
+              : otherUser.photoURL;
+            const displayName = friendData.Name_group
+              ? friendData.Name_group
+              : otherUser.name;
             setCurrentChat({
-                photoUrl: photoUrl,
-                displayName: displayName,
-                messages: messages,
+              photoUrl: photoUrl,
+              displayName: displayName,
+              messages: messages,
             });
             console.log("danh sach tin nhan", messages);
             console.log("danh sach tin nhan", photoURL);
@@ -199,8 +203,6 @@ const Chat = () => {
   const handleShow = () => {
     setShow(true);
   };
-
- 
 
   const handleTabChange = (tab) => {
     setCurrentComponent(tab);
@@ -289,7 +291,7 @@ const Chat = () => {
             <div style={{ marginLeft: 10 }}>
               <img
                 src={props.currentMessage.user.avatar}
-                style={{ width: "30px", height: " 30px", borderRadius: "15px" }}
+                style={{ width: "50px", height: " 50px", borderRadius: "50px" }}
               />
             </div>
           )}
@@ -422,14 +424,20 @@ const Chat = () => {
         let documentContentType = null;
 
         if (image) {
-          imageContentType = 'image/jpeg'; // assuming image is always jpeg for simplicity
-          imageDownloadURL = await uploadFileToFirebaseStorage(image,
-            userId?.uid, imageContentType);
+          imageContentType = "image/jpeg"; // assuming image is always jpeg for simplicity
+          imageDownloadURL = await uploadFileToFirebaseStorage(
+            image,
+            userId?.uid,
+            imageContentType
+          );
         }
         if (video) {
-          videoContentType = 'video/mp4'; // assuming video is always mp4 for simplicity
-          videoDownloadURL = await uploadFileToFirebaseStorage(video,
-            userId?.uid, videoContentType);
+          videoContentType = "video/mp4"; // assuming video is always mp4 for simplicity
+          videoDownloadURL = await uploadFileToFirebaseStorage(
+            video,
+            userId?.uid,
+            videoContentType
+          );
         }
         if (document) {
           documentContentType = ""; // assuming you have a function getFileType to determine content type
@@ -460,37 +468,36 @@ const Chat = () => {
 
   const uploadFileToFirebaseStorage = async (file, uid, contentType) => {
     try {
-        const response = await fetch(file);
-        const blob = await response.blob();
+      const response = await fetch(file);
+      const blob = await response.blob();
 
-        let storagePath = ''; // Initialize storage path variable
+      let storagePath = ""; // Initialize storage path variable
 
-        // Determine storage path based on file type
-        if (contentType === 'image') {
-            storagePath = `images/${uid}/${new Date().getTime()}/${file.name}`;
-        } else if (contentType === 'video') {
-            storagePath = `videos/${uid}/${new Date().getTime()}/${file.name}`;
-        } else {
-            storagePath = `documents/${uid}/${new Date().getTime()}`;
-        }
+      // Determine storage path based on file type
+      if (contentType === "image") {
+        storagePath = `images/${uid}/${new Date().getTime()}/${file.name}`;
+      } else if (contentType === "video") {
+        storagePath = `videos/${uid}/${new Date().getTime()}/${file.name}`;
+      } else {
+        storagePath = `documents/${uid}/${new Date().getTime()}`;
+      }
 
-        // Create a reference to the appropriate location in Firebase Storage
-        const storageRef = ref(storage, storagePath); // Make sure `storage` is referencing the root of your storage bucket
+      // Create a reference to the appropriate location in Firebase Storage
+      const storageRef = ref(storage, storagePath); // Make sure `storage` is referencing the root of your storage bucket
 
-        // Upload the file to Firebase Storage
-        await uploadBytes(storageRef, blob);
-        console.log("Upload complete");
+      // Upload the file to Firebase Storage
+      await uploadBytes(storageRef, blob);
+      console.log("Upload complete");
 
-        // Get the download URL of the uploaded file
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log(downloadURL, "downloadURL");
-        return downloadURL;
+      // Get the download URL of the uploaded file
+      const downloadURL = await getDownloadURL(storageRef);
+      console.log(downloadURL, "downloadURL");
+      return downloadURL;
     } catch (error) {
-        console.error("Error uploading file:", error);
-        throw error;
+      console.error("Error uploading file:", error);
+      throw error;
     }
-};
-
+  };
 
   // Ref to the chat messages container
   const chatMessagesRef = useRef(null);
@@ -544,18 +551,18 @@ const Chat = () => {
     const text = file.name;
 
     // Get the file extension
-    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const fileExtension = file.name.split(".").pop().toLowerCase();
 
     // Check the file extension to determine its type
     let documentType;
-    if (['pdf', 'doc', 'docx', 'txt'].includes(fileExtension)) {
-        documentType = 'document';
-    } else if (['mp4', 'avi', 'mov'].includes(fileExtension)) {
-        documentType = 'video';
-    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-        documentType = 'image';
+    if (["pdf", "doc", "docx", "txt"].includes(fileExtension)) {
+      documentType = "document";
+    } else if (["mp4", "avi", "mov"].includes(fileExtension)) {
+      documentType = "video";
+    } else if (["jpg", "jpeg", "png", "gif"].includes(fileExtension)) {
+      documentType = "image";
     } else {
-        documentType = 'unknown';
+      documentType = "unknown";
     }
 
     onSend([
@@ -567,82 +574,125 @@ const Chat = () => {
           avatar: userData?.photoURL || "default_avatar_url",
         },
         text: text,
-        document: documentType === 'document' ? fileURL : null,
-        video: documentType === 'video' ? fileURL : null,
-        image: documentType === 'image' ? fileURL : null,
+        document: documentType === "document" ? fileURL : null,
+        video: documentType === "video" ? fileURL : null,
+        image: documentType === "image" ? fileURL : null,
       },
     ]);
-};
+  };
 
+  const handleDelete = async (message) => {
+    try {
+      const chatMessRef = doc(db, "Chats", roomID, "chat_mess", message._id);
+      await deleteDoc(chatMessRef);
+      console.log("Message deleted successfully");
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
 
- 
-const handleDelete = async (message) => {
-  try {
-    const chatMessRef = doc(db, "Chats", roomID, "chat_mess", message._id);
-    await deleteDoc(chatMessRef);
-    console.log("Message deleted successfully");
-  } catch (error) {
-    console.error("Error deleting message:", error);
-  }
-};
+  const handleRecall = async (message) => {
+    try {
+      const chatRoomId = roomID;
+      const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
 
+      // Xóa tin nhắn khỏi cơ sở dữ liệu bằng cách cập nhật trạng thái của nó
+      await updateDoc(doc(chatMessRef, message._id), {
+        text: "Đã thu hồi tin nhắn",
+        document: "",
+        video: "",
+        image: "",
+      });
 
-const handleRecall = async (message) => {
-  try {
-    const chatRoomId = roomID;
-    const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
+      console.log("Message recalled successfully");
+    } catch (error) {
+      console.error("Error recalling message:", error);
+    }
+  };
 
-    // Xóa tin nhắn khỏi cơ sở dữ liệu bằng cách cập nhật trạng thái của nó
-    await updateDoc(doc(chatMessRef, message._id), {
-      text: "Đã thu hồi tin nhắn",
-      document:"",
-    });
+  const handleReply = (message) => {
+    if (message.user && message.user.name) {
+      // Lấy tên người gửi từ tin nhắn
+      const senderName = message.user.name;
+      // Tạo nội dung tin nhắn trả lời với tên người gửi
+      const replyMessage = `@${senderName} ${message.text} : `;
+      // Đặt giá trị của inputSend
+      setInputSend(replyMessage);
+    }
+  };
 
-    console.log("Message recalled successfully");
-  } catch (error) {
-    console.error("Error recalling message:", error);
-  }
-};
+  // Hàm để xử lý chuyển tiếp tin nhắn và đóng popup
+  const handleForward = async (message, receiver) => {
+    try {
+      // Tạo tin nhắn được chuyển tiếp với người nhận được chỉ định
+      const forwardedMessage = {
+        _id: Math.random().toString(),
+        createdAt: new Date(),
+        text: message.text,
+        user: {
+          _id: userId?.uid,
+          name: userData?.name || "Unknown User",
+          avatar: userData?.photoURL || "default_avatar_url",
+        },
+      };
 
-const handleReply = (message) => {
-  if (message.user && message.user.name) {
-    // Lấy tên người gửi từ tin nhắn
-    const senderName = message.user.name;
-    // Tạo nội dung tin nhắn trả lời với tên người gửi
-    const replyMessage = `@${senderName} ${message.text} : `;
-    // Đặt giá trị của inputSend
-    setInputSend(replyMessage);
-  }
-};
+      // Thêm tin nhắn đã chuyển tiếp vào cơ sở dữ liệu của người nhận
+      const chatRoomId = [userId?.uid, receiver.uid].sort().join("_");
+      const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
+      await addDoc(chatMessRef, forwardedMessage);
 
+      console.log("Message forwarded successfully");
+    } catch (error) {
+      console.error("Error forwarding message:", error);
+    }
+  };
 
-// Hàm để xử lý chuyển tiếp tin nhắn và đóng popup
-const handleForward = async (message, receiver) => {
-  try {
-    // Tạo tin nhắn được chuyển tiếp với người nhận được chỉ định
-    const forwardedMessage = {
-      _id: Math.random().toString(),
-      createdAt: new Date(),
-      text: message.text,
-      user: {
-        _id: userId?.uid,
-        name: userData?.name || "Unknown User",
-        avatar: userData?.photoURL || "default_avatar_url",
-      },
-    };
+  const handleCancelFriendship = async () => {
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-    // Thêm tin nhắn đã chuyển tiếp vào cơ sở dữ liệu của người nhận
-    const chatRoomId = [userId?.uid, receiver.uid].sort().join("_");
-    const chatMessRef = collection(db, "Chats", chatRoomId, "chat_mess");
-    await addDoc(chatMessRef, forwardedMessage);
+      // Assuming you have a "friends" collection where friendships are stored
+      const friendDocRef = doc(db, "friends", user.uid);
+      await deleteDoc(friendDocRef);
 
-    console.log("Message forwarded successfully");
-    
-    
-  } catch (error) {
-    console.error("Error forwarding message:", error);
-  }
-};
+      // Add logic to update UI or perform any other actions after canceling friendship
+    } catch (error) {
+      console.error("Error canceling friendship:", error);
+    }
+  };
+
+  const handleLeaveGroup = async (roomId) => {
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      // Get a reference to the user's document in the "users" collection
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        // Get the array of group IDs the user is a member of
+        const userGroups = userDocSnap.data().groups || [];
+
+        // Remove the roomId from the user's groups array
+        const updatedGroups = userGroups.filter(
+          (groupId) => groupId !== roomId
+        );
+
+        // Update the user document with the new groups array
+        await updateDoc(userDocRef, { groups: updatedGroups });
+
+        // Update UI or perform other actions after leaving the group
+      } else {
+        console.error("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error leaving group:", error);
+    }
+  };
 
   return (
     <div className="App-chat">
@@ -764,9 +814,28 @@ const handleForward = async (message, receiver) => {
                 <button className="btn-chatcall">
                   <DuoOutlinedIcon fontSize="large" />
                 </button>
-                <button className="btn-chatcall">
-                  <AutoAwesomeMosaicOutlinedIcon fontSize="large" />
-                </button>
+
+                <PopupState variant="popover" popupId="setting-menu">
+                  {(popupState) => (
+                    <React.Fragment>
+                      <Button
+                        {...bindTrigger(popupState)}
+                        className={`btn-chatcall ${
+                          color === 5 ? "selected" : null
+                        }`}
+                      >
+                        <AutoAwesomeMosaicOutlinedIcon fontSize="large" />
+                      </Button>
+                      <Menu {...bindMenu(popupState)}>
+                        <MenuItem
+                          onClick={() => handleLeaveGroup(currentChat.roomID)}
+                        >
+                          Rời nhóm
+                        </MenuItem>
+                      </Menu>
+                    </React.Fragment>
+                  )}
+                </PopupState>
               </div>
             </div>
             <div className="message-list" ref={chatMessagesRef}>
@@ -784,17 +853,15 @@ const handleForward = async (message, receiver) => {
                       }`}
                     >
                       {/* Kiểm tra xem tin nhắn có chứa hình ảnh không */}
-                      {
-                        renderMessage({
-                          currentMessage: message,
-                          previousMessage:
-                            index > 0
-                              ? currentChat.messages[
-                                  currentChat.messages.length - index
-                                ]
-                              : null,
-                        })
-                      }
+                      {renderMessage({
+                        currentMessage: message,
+                        previousMessage:
+                          index > 0
+                            ? currentChat.messages[
+                                currentChat.messages.length - index
+                              ]
+                            : null,
+                      })}
                     </div>
                   ))
               ) : (

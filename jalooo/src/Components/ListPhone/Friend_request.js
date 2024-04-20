@@ -155,13 +155,17 @@ const Friend_request = () => {
     <div className="list-fen">
       {userFriendsList.map((friend) => (
         <div key={friend.id} className="fenrequest">
-          <img src={friend.photoUrl} className="img-fen" alt={friend.name} />
+          <div style={{display:'flex', flexDirection:'row', alignItems:'center',marginTop:"10px"}}>
+            <img src={friend.photoUrl} className="img-fen" alt={friend.name} />
+            <p style={{marginLeft:"10px"}}>{friend.name}</p>
+          </div>
+
           <button
             type="button"
             className="btn-sub-fen"
             onClick={() => handleAddFriend(friend)}
           >
-            Kết bạn
+            Chấp nhận
           </button>
         </div>
       ))}

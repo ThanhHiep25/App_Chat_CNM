@@ -25,6 +25,10 @@
 .btn-list:hover {
   background-color: #94979c96;
 }
+
+.selected{
+  background-color: #94979c96;
+}
 .Chat-list11 {
   flex-direction: row;
   display: flex;

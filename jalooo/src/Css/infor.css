@@ -19,6 +19,8 @@
 }
 
 .img-infor-user {
+  height: 150px;
+  width: 150px;
   border-radius: 50%;
   background-color: aliceblue;
   margin-top: -80px;

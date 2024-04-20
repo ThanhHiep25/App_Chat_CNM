@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {  useState, useEffect } from "react";
 import logo from "../../IMG/6.png";
 import background from "../../IMG/Background.jpg";
 import "../../Css/infor.css";
@@ -7,10 +7,60 @@ import { useCookies } from "react-cookie";
 import back from "../../IMG/back.png";
 import next from "../../IMG/next.png";
 import Setting_infor_Modal from "./Setting_infor_Modal";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  doc,
+  addDoc,
+  query,
+  orderBy,
+  getDoc,
+  deleteDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 const Infor = () => {
   const [cookies, setCookies] = useCookies(["user"]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const userId2 = cookies.user;
+  // Check if cookies.user is null before accessing its properties
+  const [name, setName] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [avatar, setAvatar] = useState("");
+  const db = getFirestore();
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, "users", userId2.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          setUserData(userData);
+          setName(userData.name);
+          setBirthdate(userData.birthdate);
+          setGender(userData.gender);
+          setEmail(userData.email);
+          setAvatar(userData.photoURL);
+          console.log(userData, "userData")
+        } else {
+          console.log("User not found");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+
+    return () => {
+      setUserData(null); // Xóa dữ liệu người dùng khi rời khỏi màn hình
+    };
+  }, [db, userId2.uid]);
 
   const images = [
     "https://cdn.glitch.global/69143e54-6fbc-477e-a834-78df48c40871/desert_landscape_by_elffyie_dgyvfsf-pre.jpg?v=1710040428432",
@@ -19,6 +69,9 @@ const Infor = () => {
     "https://cdn.glitch.global/69143e54-6fbc-477e-a834-78df48c40871/the_dho.jpg?v=1710040447854",
     "https://cdn.glitch.global/69143e54-6fbc-477e-a834-78df48c40871/long_way_to_eden_by_joeyjazz_dendurf-pre.jpg?v=1710040441311",
   ];
+
+
+  
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -56,8 +109,8 @@ const Infor = () => {
           className="img-infor-background"
           alt="background"
         />
-        <img src={logo} className="img-infor-user" alt="background" />
-        <p className="text-infor">{cookies.user.name}</p>
+        <img src={avatar} className="img-infor-user" alt="background" />
+        <p className="text-infor">{name}</p>
       </div>
 
       <div className="edit-infor">
@@ -68,9 +121,9 @@ const Infor = () => {
 
       <div className="infor-inf">
        
-        <p className="txt-inf">Ngày sinh : <span className="spa-inf">{cookies.user.date}</span></p>
-        <p className="txt-inf">Giới tính : <span className="spa-inf gt">{cookies.user.gender}</span></p> 
-        <p className="txt-inf">Email : <span className="spa-inf mail">{cookies.user.email}</span></p>
+        <p className="txt-inf">Ngày sinh : <span className="spa-inf">{birthdate}</span></p>
+        <p className="txt-inf">Giới tính : <span className="spa-inf gt">{gender}</span></p> 
+        <p className="txt-inf">Email : <span className="spa-inf mail">{email}</span></p>
       </div>
 
       <div className="story-infor">

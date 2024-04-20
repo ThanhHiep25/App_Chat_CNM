@@ -8,12 +8,15 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  setDoc,
 } from "firebase/firestore";
 import { ChatItem } from "react-chat-elements";
 // RCE CSS
 import "react-chat-elements/dist/main.css";
 import { getAuth } from "firebase/auth";
+import InputBase from "@mui/material/InputBase";
+import IconButton from "@mui/material/IconButton";
+import SearchIcon from "@mui/icons-material/Search";
+import Paper from "@mui/material/Paper";
 
 const ListPhone = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -118,12 +121,26 @@ const ListPhone = () => {
     <div className="list-ff">
       <p className="text-listfriend">Bạn bè</p>
       <div className="list-fff">
-        <input
-          placeholder="Tìm bạn"
-          className="search-chat1"
-          value={searchTerm}
-          onChange={handleSearchInputChange}
-        />
+      <Paper
+              component="form"
+              sx={{
+                p: "2px 4px",
+                display: "flex",
+                alignItems: "center",
+                width: 600,
+              }}
+            >
+              <InputBase
+                sx={{ ml: 1, flex: 1 }}
+                placeholder="Tìm tên"
+                value={searchTerm}
+                onChange={handleSearchInputChange}
+                inputProps={{ "aria-label": "search google maps" }}
+              />
+              <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+                <SearchIcon />
+              </IconButton>
+            </Paper>
       </div>
       <div className="Border-list1">
         {showUserList &&

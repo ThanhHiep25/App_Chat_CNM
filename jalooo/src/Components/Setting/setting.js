@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import "../../Css/Setting.css";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "./LogoutModal"; // Import LogoutModal
+import { useCookies } from "react-cookie";
 
 const Setting = () => {
   const navigate = useNavigate();
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [cookies, , removeCookie] = useCookies(["user"]);
 
   const handleChooseLogout = () => {
     setLogoutModalOpen(true);
@@ -14,7 +16,7 @@ const Setting = () => {
   const handleLogout = () => {
     // Thực hiện logic đăng xuất ở đây
     // ...
-
+    removeCookie("user");
     // Đóng modal và chuyển hướng sau khi đăng xuất
     setLogoutModalOpen(false);
     navigate("/"); // Chuyển hướng đến trang chính hoặc trang đăng nhập

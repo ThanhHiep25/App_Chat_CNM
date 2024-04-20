@@ -34,8 +34,7 @@ import SearchList from "./SearchList";
 import Searchuser from "./Searchuser";
 import { getAuth } from "firebase/auth";
 import { useCookies } from "react-cookie";
-import { format } from 'timeago.js';
-
+import { format } from "timeago.js";
 
 const Listchat = ({ onSelectChat, userId, navigation }) => {
   const db = getFirestore();
@@ -43,20 +42,17 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
   const user = auth.currentUser;
   const [cookies, setCookies] = useCookies(["user"]);
   const userId2 = cookies.user;
-  const [list, setList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
   const [chats, setChats] = useState([]);
   const [showUserList, setShowUserList] = useState(true); // Mặc định hiển thị danh sách
   const [ID_room1, setID_room1] = useState("");
-
+  const [selectedChat, setSelectedChat] = useState(null);
 
   useEffect(() => {
     const chatsCollectionRef = collection(db, "Chats");
     const chatsQuery = query(
       chatsCollectionRef,
-      where("UID", "array-contains",userId2.uid)
+      where("UID", "array-contains", userId2.uid)
     );
     const unsubscribeChats = onSnapshot(chatsQuery, (snapshot) => {
       const chatsMap = new Map();
@@ -64,7 +60,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
       snapshot.docs.forEach(async (chatDoc) => {
         const chatData = chatDoc.data();
         setID_room1(chatData.ID_roomChat);
-        const chatUIDs = chatData.UID.filter((uid) => uid !== userId2.uid);
+        const chatUIDs = chatData.UID.filter((uid) => uid !== userId.uid);
         const otherUID = chatUIDs[0];
         const userDocRef = doc(db, "users", otherUID);
         const userDocSnap = await getDoc(userDocRef);
@@ -85,7 +81,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
             const latestDeleteTime = detailDeleteArray.reduce(
               (latest, detail) => {
                 if (
-                  detail.uidDelete === user.uid &&
+                  detail.uidDelete === userId2.uid &&
                   detail.timeDelete.toDate() > latest
                 ) {
                   return detail.timeDelete.toDate();
@@ -98,6 +94,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
             if (
               !latestDeleteTime ||
               (latestMessage &&
+                latestMessage.createdAt &&
                 latestMessage.createdAt.toDate() > latestDeleteTime)
             ) {
               const chatItem = {
@@ -113,8 +110,12 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
                 },
                 latestMessage: latestMessage,
               };
-              chatsMap.set(chatItem.ID_room, chatItem);
+              // Kiểm tra nếu latestMessage và createdAt không null trước khi thêm vào chatsMap
+              if (latestMessage && latestMessage.createdAt) {
+                chatsMap.set(chatItem.ID_room, chatItem);
+              }
             }
+
             const sortedChats = Array.from(chatsMap.values()).sort((a, b) => {
               if (a.latestMessage && b.latestMessage) {
                 return b.latestMessage.createdAt - a.latestMessage.createdAt;
@@ -135,7 +136,6 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
     };
   }, [db, user]);
 
-
   // Khi người dùng bắt đầu nhập từ khóa tìm kiếm, ẩn danh sách người dùng
   const handleSearchInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -146,15 +146,18 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
     }
   };
   const handleSearch = () => {
-    return chats.filter((user) =>
-      (user.Name_group && user.Name_group.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.otherUser.name && user.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    return chats.filter(
+      (user) =>
+        (user.Name_group &&
+          user.Name_group.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.otherUser.name &&
+          user.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   };
-  
 
-  const handleChatSelection = async (user) => {  
-      onSelectChat(user,{user:user.otherUser},user.ID_room);
+  const handleChatSelection = async (user) => {
+    onSelectChat(user, user.otherUser, user.ID_room);
+    setSelectedChat(user); // Lưu thông tin về chat item được chọn
   };
 
   const [open, setOpen] = React.useState(false);
@@ -181,12 +184,26 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
       <SearchList open={open} handleClose={handleClose} />
       <Searchuser openAdd={openAdd} handleCloseAdd={handleCloseAdd} />
       <div className="bar-chat">
-        <input
-          placeholder="search"
-          className="search-chat"
-          value={searchTerm}
-          onChange={handleSearchInputChange} // Sử dụng hàm xử lý mới
-        />
+        <Paper
+          component="form"
+          sx={{
+            p: "2px 4px",
+            display: "flex",
+            alignItems: "center",
+            width: 400,
+          }}
+        >
+          <InputBase
+            sx={{ ml: 1, flex: 1 }}
+            placeholder="Tìm tên"
+            value={searchTerm}
+            onChange={handleSearchInputChange}
+            inputProps={{ "aria-label": "search google maps" }}
+          />
+          <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+            <SearchIcon />
+          </IconButton>
+        </Paper>
         <div className="add-chat">
           <button className="btn-add" onClick={handleOpenAdd}>
             <img src={add_user} className="img-add" alt="add-user" />
@@ -201,31 +218,11 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
         {showUserList &&
           chats.map((user) => (
             <ul className={`ul-set`} key={user.id}>
+              <button
+                className={`st ${selectedChat === user ? "status" : null}`}
+              ></button>
               <li className="li-set">
-              <ChatItem
-                  avatar={
-                      user.Photo_group
-                          ? user.Photo_group
-                          : user.otherUser.photoURL && user.otherUser.photoURL
-                  }
-                  alt={"Reactjs"}
-                  title={
-                      user.Name_group ? user.Name_group : user.otherUser.name
-                  }
-                  subtitle={user.latestMessage && user.latestMessage.text}
-                  // date={user.latestMessage.createdAt.toDate()} // Convert Firestore Timestamp to JavaScript Date
-                  unread={0}
-                  onClick={() => handleChatSelection(user)}
-              />
-
-              </li>
-            </ul>
-          ))}
-        {!showUserList &&
-          handleSearch().map((user) => (
-            <ul className={`ul-set`} key={user.id}>
-              <li className="li-set">
-              <ChatItem
+                <ChatItem
                   avatar={
                     user.Photo_group
                       ? user.Photo_group
@@ -236,7 +233,32 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
                     user.Name_group ? user.Name_group : user.otherUser.name
                   }
                   subtitle={user.latestMessage && user.latestMessage.text}
-                  date={new Date()}
+                  date={user.latestMessage.createdAt.toDate()} // Convert Firestore Timestamp to JavaScript Date
+                  unread={0}
+                  statusColor="#8DECB4"
+                  statusColorType="custom"
+                  className={selectedChat === user ? "selected-chat" : ""}
+                  onClick={() => handleChatSelection(user)}
+                />
+              </li>
+            </ul>
+          ))}
+        {!showUserList &&
+          handleSearch().map((user) => (
+            <ul className={`ul-set`} key={user.id}>
+              <li className="li-set">
+                <ChatItem
+                  avatar={
+                    user.Photo_group
+                      ? user.Photo_group
+                      : user.otherUser.photoURL && user.otherUser.photoURL
+                  }
+                  alt={"Reactjs"}
+                  title={
+                    user.Name_group ? user.Name_group : user.otherUser.name
+                  }
+                  subtitle={user.latestMessage && user.latestMessage.text}
+                  date={user.latestMessage.createdAt.toDate()} // Convert Firestore Timestamp to JavaScript Date
                   unread={0}
                   onClick={() => handleChatSelection(user)}
                 />

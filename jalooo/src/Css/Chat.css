@@ -13,6 +13,15 @@
   align-items: center;
 }
 
+.img-infor-user {
+  height: 150px;
+  width: 150px;
+  border-radius: 50%;
+  background-color: aliceblue;
+  margin-top: -80px;
+  border: 1px solid black;
+}
+
 .img-logo {
   height: 60px;
   width: 60px;
