@@ -3,7 +3,6 @@ import "../../Css/ListPhone.css";
 import {
   getFirestore,
   collection,
-  query,
   getDocs,
   doc,
   getDoc,
@@ -88,7 +87,7 @@ const ListPhone = () => {
               ID_roomChat: friendData.ID_roomChat,
             });
           });
-          console.log(userFriends);
+          console.table(userFriends);
           setUserFriendsList(userFriends); // Update friends list
         });
 

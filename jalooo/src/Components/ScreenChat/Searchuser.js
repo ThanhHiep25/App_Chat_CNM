@@ -172,7 +172,7 @@ const Searchuser = ({ openAdd, handleCloseAdd }) => {
           UID: sortedUIDs,
           UID_Chats: sortedUIDs.join("_"),
         });
-        console.log("New chat room created:", friendData);
+        console.table("New chat room created:", friendData);
       }
 
       // Return chatRoomId
@@ -264,7 +264,7 @@ const Searchuser = ({ openAdd, handleCloseAdd }) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <Box sx={{ ...style, width: 400 }}>
+        <Box sx={{ ...style, width: 600 }}>
           <div
             style={{
               display: "flex",
@@ -301,6 +301,7 @@ const Searchuser = ({ openAdd, handleCloseAdd }) => {
               marginTop: "10px",
             }}
           >
+            
             {!showUserList &&
               handleSearchAdd().map((user) => (
                 <ul className={`ul-set`} key={user.id}>
@@ -315,7 +316,7 @@ const Searchuser = ({ openAdd, handleCloseAdd }) => {
                         avatar={user.photoUrl}
                         alt={"Reactjs"}
                         title={user.name}
-                        date={new Date()}
+                        date=""
                         unread={0}
                       />
                     </li>

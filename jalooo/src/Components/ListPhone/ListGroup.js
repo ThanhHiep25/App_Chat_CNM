@@ -14,7 +14,6 @@ import {
 import { ChatItem } from "react-chat-elements";
 // RCE CSS
 import "react-chat-elements/dist/main.css";
-import { getAuth } from "firebase/auth";
 import { useCookies } from "react-cookie";
 import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";

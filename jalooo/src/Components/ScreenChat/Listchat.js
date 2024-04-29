@@ -8,35 +8,24 @@ import {
   onSnapshot,
   doc,
   getDoc,
-  getDocs,
   query,
   orderBy,
   where,
-  updateDoc,
-  setDoc,
 } from "firebase/firestore";
 import { ChatItem } from "react-chat-elements";
 // RCE CSS
 import "react-chat-elements/dist/main.css";
-// MessageBox component
-import { MessageBox } from "react-chat-elements";
-import Box from "@mui/material/Box";
-import Modal from "@mui/material/Modal";
-import Button from "@mui/material/Button";
-import Avatar from "@mui/material/Avatar";
-import TextField from "@mui/material/TextField";
 import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
 import SearchList from "./SearchList";
 import Searchuser from "./Searchuser";
 import { getAuth } from "firebase/auth";
 import { useCookies } from "react-cookie";
-import { format } from "timeago.js";
 
-const Listchat = ({ onSelectChat, userId, navigation }) => {
+
+const Listchat = ({ onSelectChat, userId}) => {
   const db = getFirestore();
   const auth = getAuth();
   const user = auth.currentUser;
@@ -60,7 +49,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
       snapshot.docs.forEach(async (chatDoc) => {
         const chatData = chatDoc.data();
         setID_room1(chatData.ID_roomChat);
-        const chatUIDs = chatData.UID.filter((uid) => uid !== userId.uid);
+        const chatUIDs = chatData.UID.filter((uid) => uid !== userId);
         const otherUID = chatUIDs[0];
         const userDocRef = doc(db, "users", otherUID);
         const userDocSnap = await getDoc(userDocRef);
@@ -156,7 +145,7 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
   };
 
   const handleChatSelection = async (user) => {
-    onSelectChat(user, user.otherUser, user.ID_room);
+    onSelectChat(user, user.otherUser, user.ID_room, user.ID_roomChat);
     setSelectedChat(user); // Lưu thông tin về chat item được chọn
   };
 
@@ -232,8 +221,8 @@ const Listchat = ({ onSelectChat, userId, navigation }) => {
                   title={
                     user.Name_group ? user.Name_group : user.otherUser.name
                   }
-                  subtitle={user.latestMessage && user.latestMessage.text}
-                  date={user.latestMessage.createdAt.toDate()} // Convert Firestore Timestamp to JavaScript Date
+                  subtitle={user.latestMessage && `Tin nhắn : ${user.latestMessage.text}`}
+                  date={user.latestMessage.createdAt.toDate()} 
                   unread={0}
                   statusColor="#8DECB4"
                   statusColorType="custom"
