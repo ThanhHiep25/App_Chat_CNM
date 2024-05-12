@@ -3,19 +3,25 @@ const { getAuth } = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
 const { getStorage } = require("firebase/storage");
 
-
 // Firebase config
 const firebaseConfig = {
-    apiKey: "AIzaSyBOtG1ZPHkmmuusyHeA2XWnJz11LaBh7jE",
-    authDomain: "demo1-1f76f.firebaseapp.com",
-    databaseURL: "https://demo1-1f76f-default-rtdb.firebaseio.com",
-    projectId: "demo1-1f76f",
-    storageBucket: "demo1-1f76f.appspot.com",
-    messagingSenderId: "554058119118",
-    appId: "1:554058119118:web:7a1b01e983df523121dd9f",
-    measurementId: "G-F773N5X4YF"
-};
+  // apiKey: "AIzaSyBOtG1ZPHkmmuusyHeA2XWnJz11LaBh7jE",
+  // authDomain: "demo1-1f76f.firebaseapp.com",
+  // databaseURL: "https://demo1-1f76f-default-rtdb.firebaseio.com",
+  // projectId: "demo1-1f76f",
+  // storageBucket: "demo1-1f76f.appspot.com",
+  // messagingSenderId: "554058119118",
+  // appId: "1:554058119118:web:7a1b01e983df523121dd9f",
+  // measurementId: "G-F773N5X4YF"
 
+  apiKey: "AIzaSyAaoacOFUifnB_WlyS-YOe1upqsaauUskw",
+  authDomain: "demo1-c4035.firebaseapp.com",
+  projectId: "demo1-c4035",
+  storageBucket: "demo1-c4035.appspot.com",
+  messagingSenderId: "1040251528721",
+  appId: "1:1040251528721:web:852a5952501c5bddcbf3b0",
+  measurementId: "G-WVNY93T2Z9",
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();

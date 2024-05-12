@@ -28,6 +28,7 @@ const ListGroup = () => {
   const [userGroups, setUserGroups] = useState([]);
   const db = getFirestore()
 
+
   useEffect(() => {
     const fetchUserGroups = async () => {
       try {
