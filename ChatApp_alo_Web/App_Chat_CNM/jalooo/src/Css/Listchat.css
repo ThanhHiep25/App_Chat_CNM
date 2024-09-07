@@ -1,0 +1,117 @@
+.Chat-list {
+  background-color: rgb(248, 248, 248);
+  width: 550px;
+}
+
+.Border-list {
+  overflow-y: scroll; 
+  height: 85vh;
+}
+/* Bar add fr */
+.bar-chat {
+ margin: 10px;
+ height: 60px;
+ display: flex;
+ flex-direction: row;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.search-chat{
+  height: 25px;
+  border: none;
+  padding: 2px;
+  padding-left: 5px;
+  border-radius: 4px;
+  width: 200px;
+}
+
+/* custom chat */
+.btn-chat {
+  border: none;
+  background-color: #ffff;
+  height: 70px;
+  width: 315px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn-chat:hover {
+  background-color: #f3c3c315;
+}
+
+.ul-set {
+  list-style: none;
+  margin-left: -40px;
+}
+
+.li-set {
+  margin-top: -15px;
+}
+/* Custom chat user */
+.Logo-user {
+  height: 40px;
+  width: 40px;
+  border-radius: 40px;
+}
+
+.chat-set-message{
+  display: flex;
+  flex-direction: row;
+  align-items: center ;
+  margin-left: 30px;
+  margin: 20px;
+  width: 200px; 
+}
+
+.name-user-resender{
+  margin: 15px;
+}
+
+.messager-user-resender{
+  margin-top: -10px;
+  color: rgb(158, 156, 153);
+}
+/* Button add */
+
+.add-chat {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 80px;
+}
+
+
+.btn-add {
+  height: 25px;
+  padding: 2px;
+  background-color:rgba(240, 248, 255, 0);
+  border: none;
+  width: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+
+.img-add{
+  height: 24px;
+  width: 24px;
+}
+
+/* Listchat.css */
+.ul-set.selected {
+  background-color: #e0e0e0; /* Màu nền khi người dùng được chọn */
+}
+
+.btn-chat.selected {
+  border: 2px solid #9ed3ff81; /* Màu đường viền khi người dùng được chọn */
+  /* Các thuộc tính CSS khác cho khi người dùng được chọn */
+  background-color: #9ffcff56;
+}
+

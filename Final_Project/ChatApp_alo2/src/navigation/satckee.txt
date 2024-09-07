@@ -1,0 +1,398 @@
+import React, { useState } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image } from 'react-native';
+import { AntDesign, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+
+const SearchFriend = () => {
+  const navigation = useNavigation();
+  const [input, setInput] = useState("");
+  const [friend, setFriend] = useState(null);
+
+  const handleInputChange = (text) => {
+    setInput(text);
+  };
+
+  const handleSearch = async () => {
+    try {
+      const db = getFirestore();
+      
+      // Truy vấn tài liệu trong collection "users" với điều kiện trường "userId" phải bằng giá trị nhập vào từ input
+      const userQuery = query(collection(db, "users"), where("userId", "==", input));
+      const userSnapshot = await getDocs(userQuery);
+
+      // Nếu tìm thấy người dùng có "userId" trùng khớp, hiển thị tên và ảnh của người dùng đó
+      if (!userSnapshot.empty) {
+        const userData = userSnapshot.docs[0].data();
+        setFriend({
+          id: userData.userId,
+          name: userData.name,
+          photoUrl: userData.photoURL,
+        });
+      } else {
+        // Nếu không tìm thấy người dùng, đặt friend về null
+        setFriend(null);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <TextInput
+            style={styles.searchInput}
+            value={input}
+            onChangeText={handleInputChange}
+            placeholder="...... "
+            placeholderTextColor="white"
+          />
+        <Pressable
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed ? '#0d47a1' : '#006AF5', // Màu nền thay đổi khi nút được nhấn
+              paddingHorizontal: 10,
+              borderRadius: 5, // Bo tròn các góc
+            },
+            styles.searchButton // Thêm style từ StyleSheet
+          ]}
+          onPress={handleSearch}
+        >
+          <Text style={styles.textSearch}>Tìm kiếm bạn bè</Text>
+        </Pressable>
+
+          {/* <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
+          <Feather name="plus" size={30} color="white" /> */}
+        </View>
+
+        {/* Hiển thị tên và ảnh của người dùng nếu tìm thấy */}
+        {friend && (
+          <View style={styles.itemContainer}>
+            <Pressable>
+              <Image style={styles.image} source={{ uri: friend.photoUrl }} />
+              <Text style={styles.text}>{friend.name}</Text>
+            </Pressable>
+          </View>
+        )}
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    height: 48,
+    marginLeft: 10,
+    color: 'white',
+  },
+  searchButton: {
+    paddingHorizontal: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  },
+  itemContainer: {
+    marginTop: 20,
+    flex: 1,
+    margin: 20,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+  },
+  text: {
+    marginTop: 10,
+  },
+});
+
+export default SearchFriend;
+
+
+
+//////
+
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { auth } from '../../config/firebase';
+
+export default function Signup({ navigation, setIsLoggedIn }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const db = getFirestore();
+
+  const onHandleSignup = () => {
+    if (email !== '' && password !== '' && name !== '') {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          updateProfile(userCredential.user, {
+            displayName: name
+          }).then(() => {
+            // Lưu tên người dùng vào Firestore
+            setDoc(doc(db, "users", userCredential.user.uid), {
+              name: name,
+              userId: email
+            }).then(() => {
+              setIsLoggedIn(false);
+              Alert.alert(
+                'Signup success',
+                'You have signed up successfully!',
+                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+              );
+            }).catch((error) => {
+              console.log("Error adding document: ", error);
+            });
+          }).catch((error) => {
+            console.log("Update profile error: ", error);
+          });
+        })
+        .catch((err) => Alert.alert("Signup error", err.message));
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.whiteSheet} />
+      <View style={styles.form}>
+        <Text style={styles.title}>Sign Up</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoFocus={true}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry={true}
+          textContentType="password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your name"
+          autoCapitalize="words"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={onHandleSignup}>
+          <Text style={{ fontWeight: 'bold', color: '#fff', fontSize: 18 }}>Sign Up</Text>
+        </TouchableOpacity>
+        <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
+          <Text style={{ color: 'gray', fontWeight: '600', fontSize: 14 }}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={{ color: '#006AF5', fontWeight: '600', fontSize: 14 }}>Log In</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <StatusBar barStyle="light-content" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: "#006AF5",
+    alignSelf: "center",
+    paddingBottom: 24,
+  },
+  input: {
+    backgroundColor: "#F6F7FB",
+    height: 58,
+    marginBottom: 20,
+    fontSize: 16,
+    borderRadius: 10,
+    padding: 12,
+  },
+  whiteSheet: {
+    width: '100%',
+    height: '75%',
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 60,
+  },
+  form: {
+    flex: 1,
+    justifyContent: 'center',
+    marginHorizontal: 30,
+  },
+  button: {
+    backgroundColor: '#006AF5',
+    height: 58,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+});
+
+
+//////////////////////
+
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { auth } from '../../config/firebase';
+
+export default function Signup({ navigation, setIsLoggedIn }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const db = getFirestore();
+
+  const onHandleSignup = () => {
+    if (email !== '' && password !== '' && name !== '') {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          updateProfile(userCredential.user, {
+            displayName: name
+          }).then(() => {
+            // Lưu tên người dùng vào Firestore
+            setDoc(doc(db, "users", userCredential.user.uid), {
+              name: name,
+              userId: email
+            }).then(() => {
+              setIsLoggedIn(false);
+              Alert.alert(
+                'Signup success',
+                'You have signed up successfully!',
+                [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+              );
+            }).catch((error) => {
+              console.log("Error adding document: ", error);
+            });
+          }).catch((error) => {
+            console.log("Update profile error: ", error);
+          });
+        })
+        .catch((err) => Alert.alert("Signup error", err.message));
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.whiteSheet} />
+      <View style={styles.form}>
+        <Text style={styles.title}>Sign Up</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoFocus={true}
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter password"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry={true}
+          textContentType="password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your name"
+          autoCapitalize="words"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={onHandleSignup}>
+          <Text style={{ fontWeight: 'bold', color: '#fff', fontSize: 18 }}>Sign Up</Text>
+        </TouchableOpacity>
+        <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
+          <Text style={{ color: 'gray', fontWeight: '600', fontSize: 14 }}>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={{ color: '#006AF5', fontWeight: '600', fontSize: 14 }}>Log In</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <StatusBar barStyle="light-content" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: "#006AF5",
+    alignSelf: "center",
+    paddingBottom: 24,
+  },
+  input: {
+    backgroundColor: "#F6F7FB",
+    height: 58,
+    marginBottom: 20,
+    fontSize: 16,
+    borderRadius: 10,
+    padding: 12,
+  },
+  whiteSheet: {
+    width: '100%',
+    height: '75%',
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 60,
+  },
+  form: {
+    flex: 1,
+    justifyContent: 'center',
+    marginHorizontal: 30,
+  },
+  button: {
+    backgroundColor: '#006AF5',
+    height: 58,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+});

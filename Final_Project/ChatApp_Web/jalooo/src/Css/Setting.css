@@ -1,0 +1,26 @@
+.setting-fr{
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+
+.btn-setting {
+    height: 80px;
+    width: 300px;
+    background-color: #d1d3d17e;
+    border: none;
+    margin: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-setting:hover{
+    background-color: #A0E9FF;
+}
+
+.modal-setup{
+    height: 300px;
+    width: 300px;
+}

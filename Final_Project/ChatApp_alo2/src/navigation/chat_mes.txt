@@ -1,0 +1,3108 @@
+useEffect(() => {
+  // Hàm để fetch dữ liệu từ Firestore
+  const fetchChatsData = async () => {
+    try {
+      const q = query(collection(db, 'Chats'), where('UID', 'array-contains', user.uid));
+      
+      // Sử dụng onSnapshot để theo dõi các thay đổi trên query
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const chatsData = [];
+        querySnapshot.forEach(async (chatDoc) => {
+          const chatData = chatDoc.data();
+          const chatUIDs = chatData.UID.filter(uid => uid !== user.uid);
+          const otherUID = chatUIDs[0];
+          
+          const userDocRef = doc(db, 'users', otherUID);
+          const userDocSnap = await getDoc(userDocRef);
+          const userData = userDocSnap.data();
+          
+          const messQuery = query(
+            collection(db, 'Chats', chatData.UID_Chats, 'chat_mess'),
+            orderBy('createdAt', 'desc')
+          );
+          
+          const messQuerySnapshot = await getDocs(messQuery);
+          let latestMessage = null;
+          if (!messQuerySnapshot.empty) {
+            latestMessage = messQuerySnapshot.docs[0].data();
+          }
+
+          const chatItem = {
+            ID_room: chatData.ID_roomChat,
+            otherUser: {
+              UID: userData.UID,
+              name: userData.name,
+              photoURL: userData.photoURL,
+              userId: userData.userId
+            },
+            latestMessage: latestMessage
+          };
+          chatsData.push(chatItem);
+        });
+
+        // Sắp xếp mảng chatsData theo thời gian của tin nhắn gần nhất
+        chatsData.sort((a, b) => {
+          if (a.latestMessage && b.latestMessage) {
+            return b.latestMessage.createdAt - a.latestMessage.createdAt;
+          }
+          return 0;
+        });
+
+        setChats(chatsData);
+      });
+
+      // Return một hàm unsubscribe để dừng việc theo dõi khi component unmount
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error fetching chats data:', error);
+    }
+  };
+
+  // Gọi fetchChatsData một lần ngay sau khi component được render
+  fetchChatsData();
+
+}, []); // Dependency array rỗng để đảm bảo useEffect chỉ chạy một lần khi component được render
+
+////////////
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image, FlatList } from 'react-native';
+import { AntDesign, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs } from 'firebase/firestore';
+
+const Chat = () => {
+  const navigation = useNavigation();
+  const db = getFirestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+  const [chats, setChats] = useState([]);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    if (user) {
+      fetchUserData();
+    }
+  }, [db, user]);
+
+  // Fetch chats data and listen for real-time updates
+  useEffect(() => {
+    const unsubscribeChats = onSnapshot(collection(db, 'Chats'), async (snapshot) => {
+      const chatsData = [];
+      for (const chatDoc of snapshot.docs) {
+        const chatData = chatDoc.data();
+        const chatUIDs = chatData.UID.filter(uid => uid !== user.uid);
+        const otherUID = chatUIDs[0];
+        
+        const userDocRef = doc(db, 'users', otherUID);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          
+          const messQuery = collection(db, 'Chats', chatData.UID_Chats, 'chat_mess');
+          const messQuerySnapshot = await getDocs(messQuery);
+          let latestMessage = null;
+          if (!messQuerySnapshot.empty) {
+            latestMessage = messQuerySnapshot.docs[0].data();
+          }
+
+          const chatItem = {
+            ID_room: chatData.ID_roomChat,
+            otherUser: {
+              UID: userData.UID,
+              name: userData.name,
+              photoURL: userData.photoURL,
+              userId: userData.userId
+            },
+            latestMessage: latestMessage
+          };
+          chatsData.push(chatItem);
+        }
+      }
+
+      // Sort chats data by latest message timestamp
+      chatsData.sort((a, b) => {
+        if (a.latestMessage && b.latestMessage) {
+          return b.latestMessage.createdAt - a.latestMessage.createdAt;
+        }
+        return 0;
+      });
+
+      setChats(chatsData);
+    });
+
+    return () => unsubscribeChats();
+  }, [db, user]);
+
+  // Render each chat item
+  const renderItem = ({ item }) => (
+    <Pressable style={styles.itemContainer} onPress={() => navigation.navigate("Chat_fr", { friendData: item.otherUser })}>
+      <View style={styles.contentContainer}>
+        <Image source={{ uri: item.otherUser.photoURL }} style={styles.avatar} />
+        <View style={styles.messageContainer}>
+          <Text style={styles.userName}>{item.otherUser.name}</Text>
+          {item.latestMessage && (
+            <View style={styles.latestMessageContent}>
+              <Text style={styles.latestMessageText}>{item.latestMessage.text}</Text>
+              <Text style={styles.latestMessageTimestamp}>
+                {item.latestMessage.createdAt.toDate().toLocaleString()}
+              </Text>
+              <View style={styles.separator}></View>
+            </View>
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <Pressable style={styles.searchInput} onPress={() => navigation.navigate("SearchFriend")}>
+            <Text style={styles.textSearch}>Tìm kiếm</Text>
+          </Pressable>
+          <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
+          <Feather name="plus" size={30} color="white" />
+        </View>
+      </SafeAreaView>
+      <FlatList
+        data={chats}
+        renderItem={renderItem}
+        keyExtractor={item => item.ID_room.toString()}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  }, 
+  itemContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+    width:'100%',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  messageContainer: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  latestMessageContent: {
+    backgroundColor: 'white',
+    padding: 8,s
+    borderRadius: 5,
+  },
+  latestMessageText: {
+    fontSize: 14,
+  },
+  latestMessageTimestamp: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#dcdcdc',
+    width: '100%',
+  },
+});
+
+export default Chat;
+
+
+/////
+
+
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image, FlatList } from 'react-native';
+import { AntDesign, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query , orderBy} from 'firebase/firestore';
+
+const Chat = () => {
+  const navigation = useNavigation();
+  const db = getFirestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+  const [chats, setChats] = useState([]);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    if (user) {
+      fetchUserData();
+    }
+  }, [db, user]);
+
+  // Fetch chats data and listen for real-time updates
+  useEffect(() => {
+    const unsubscribeChats = onSnapshot(collection(db, 'Chats'), async (snapshot) => {
+      const chatsData = [];
+      for (const chatDoc of snapshot.docs) {
+        const chatData = chatDoc.data();
+        const chatUIDs = chatData.UID.filter(uid => uid !== user.uid);
+        const otherUID = chatUIDs[0];
+        
+        const userDocRef = doc(db, 'users', otherUID);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          
+          
+          const messQuery = query(
+            collection(db, 'Chats', chatData.UID_Chats, 'chat_mess'),
+            orderBy('createdAt', 'desc')
+          );
+          
+          const messQuerySnapshot = await getDocs(messQuery);
+          let latestMessage = null;
+          if (!messQuerySnapshot.empty) {
+            latestMessage = messQuerySnapshot.docs[0].data();
+          }
+
+          const chatItem = {
+            ID_room: chatData.ID_roomChat,
+            otherUser: {
+              UID: userData.UID,
+              name: userData.name,
+              photoURL: userData.photoURL,
+              userId: userData.userId
+            },
+            latestMessage: latestMessage
+          };
+          chatsData.push(chatItem);
+        }
+      }
+
+      // Sort chats data by latest message timestamp
+      chatsData.sort((a, b) => {
+        if (a.latestMessage && b.latestMessage) {
+          return b.latestMessage.createdAt - a.latestMessage.createdAt;
+        }
+        return 0;
+      });
+
+      setChats(chatsData);
+    });
+
+    return () => unsubscribeChats();
+  }, [db, user]);
+
+  // Render each chat item
+  const renderItem = ({ item }) => (
+    <Pressable style={styles.itemContainer} onPress={() => navigation.navigate("Chat_fr", { friendData: item.otherUser })}>
+      <View style={styles.contentContainer}>
+        <Image source={{ uri: item.otherUser.photoURL }} style={styles.avatar} />
+        <View style={styles.messageContainer}>
+          <Text style={styles.userName}>{item.otherUser.name}</Text>
+          {item.latestMessage && (
+            <View style={styles.latestMessageContent}>
+              <Text style={styles.latestMessageText}>{item.latestMessage.text}</Text>
+              <Text style={styles.latestMessageTimestamp}>
+                {item.latestMessage.createdAt.toDate().toLocaleString()}
+              </Text>
+              <View style={styles.separator}></View>
+            </View>
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <Pressable style={styles.searchInput} onPress={() => navigation.navigate("SearchFriend")}>
+            <Text style={styles.textSearch}>Tìm kiếm</Text>
+          </Pressable>
+          <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
+          <Feather name="plus" size={30} color="white" />
+        </View>
+      </SafeAreaView>
+      <FlatList
+        data={chats}
+        renderItem={renderItem}
+        keyExtractor={item => item.ID_room.toString()}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  }, 
+  itemContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+    width:'100%',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  messageContainer: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  latestMessageContent: {
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 5,
+  },
+  latestMessageText: {
+    fontSize: 14,
+  },
+  latestMessageTimestamp: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#dcdcdc',
+    width: '100%',
+  },
+});
+
+export default Chat;
+
+//////////////////
+
+
+
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image, FlatList } from 'react-native';
+import { AntDesign, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs } from 'firebase/firestore';
+
+const Chat = () => {
+  const navigation = useNavigation();
+  const db = getFirestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+  const [chats, setChats] = useState([]);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    if (user) {
+      fetchUserData();
+    }
+  }, [db, user]);
+
+  // Fetch chats data and listen for real-time updates
+  useEffect(() => {
+    const unsubscribeChats = onSnapshot(collection(db, 'Chats'), async (snapshot) => {
+      const chatsData = [];
+      for (const chatDoc of snapshot.docs) {
+        const chatData = chatDoc.data();
+        const chatUIDs = chatData.UID.filter(uid => uid !== user.uid);
+        const otherUID = chatUIDs[0];
+        
+        const userDocRef = doc(db, 'users', otherUID);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          
+          const messQuery = collection(db, 'Chats', chatData.UID_Chats, 'chat_mess');
+
+          const messQuerySnapshot = await getDocs(messQuery);
+          let latestMessage = null;
+          if (!messQuerySnapshot.empty) {
+            latestMessage = messQuerySnapshot.docs[0].data();
+          }
+
+          const chatItem = {
+            ID_room: chatData.ID_roomChat,
+            otherUser: {
+              UID: userData.UID,
+              name: userData.name,
+              photoURL: userData.photoURL,
+              userId: userData.userId
+            },
+            latestMessage: latestMessage
+          };
+          chatsData.push(chatItem);
+        }
+      }
+
+      // Sort chats data by latest message timestamp
+      chatsData.sort((a, b) => {
+        if (a.latestMessage && b.latestMessage) {
+          return b.latestMessage.createdAt - a.latestMessage.createdAt;
+        }
+        return 0;
+      });
+
+      setChats(chatsData);
+    });
+
+    return () => unsubscribeChats();
+  }, [db, user]);
+
+  // Render each chat item
+  const renderItem = ({ item }) => (
+    <Pressable style={styles.itemContainer} onPress={() => navigation.navigate("Chat_fr", { friendData: item.otherUser })}>
+      <View style={styles.contentContainer}>
+        <Image source={{ uri: item.otherUser.photoURL }} style={styles.avatar} />
+        <View style={styles.messageContainer}>
+          <Text style={styles.userName}>{item.otherUser.name}</Text>
+          {item.latestMessage && (
+            <View style={styles.latestMessageContent}>
+              <Text style={styles.latestMessageText}>{item.latestMessage.text}</Text>
+              <Text style={styles.latestMessageTimestamp}>
+                {item.latestMessage.createdAt.toDate().toLocaleString()}
+              </Text>
+              <View style={styles.separator}></View>
+            </View>
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <Pressable style={styles.searchInput} onPress={() => navigation.navigate("SearchFriend")}>
+            <Text style={styles.textSearch}>Tìm kiếm</Text>
+          </Pressable>
+          <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
+          <Feather name="plus" size={30} color="white" />
+        </View>
+      </SafeAreaView>
+      <FlatList
+        data={chats}
+        renderItem={renderItem}
+        keyExtractor={item => item.ID_room.toString()}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  }, 
+  itemContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+    width:'100%',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  messageContainer: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  latestMessageContent: {
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 5,
+  },
+  latestMessageText: {
+    fontSize: 14,
+  },
+  latestMessageTimestamp: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#dcdcdc',
+    width: '100%',
+  },
+});
+
+export default Chat;
+
+
+////////////////
+
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image, FlatList } from 'react-native';
+import { AntDesign, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query , orderBy} from 'firebase/firestore';
+
+const Chat = () => {
+  const navigation = useNavigation();
+  const db = getFirestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+  const [chats, setChats] = useState([]);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    if (user) {
+      fetchUserData();
+    }
+  }, [db, user]);
+
+  // Fetch chats data and listen for real-time updates
+  useEffect(() => {
+    const unsubscribeChats = onSnapshot(collection(db, 'Chats'), (snapshot) => {
+      const chatsMap = new Map();
+  
+      snapshot.docs.forEach(async (chatDoc) => {
+        const chatData = chatDoc.data();
+        const chatUIDs = chatData.UID.filter((uid) => uid !== user.uid);
+        const otherUID = chatUIDs[0];
+        
+        const userDocRef = doc(db, 'users', otherUID);
+        const userDocSnap = await getDoc(userDocRef);
+  
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          
+          const messQuery = query(
+            collection(db, 'Chats', chatData.UID_Chats, 'chat_mess'),
+            orderBy('createdAt', 'desc')
+          );
+  
+          // Listen for real-time updates for chat messages
+          const unsubscribeMessages = onSnapshot(messQuery, (messSnapshot) => {
+            let latestMessage = null;
+            if (!messSnapshot.empty) {
+              latestMessage = messSnapshot.docs[0].data();
+            }
+  
+            const chatItem = {
+              ID_room: chatDoc.data().ID_roomChat,
+              otherUser: {
+                UID: userData.UID,
+                name: userData.name,
+                photoURL: userData.photoURL,
+                userId: userData.userId
+              },
+              latestMessage: latestMessage
+            };
+  
+            // Update chatsMap with the new chat item
+            chatsMap.set(chatItem.ID_room, chatItem);
+  
+            // Convert map values to array and sort by latest message timestamp
+            const sortedChats = Array.from(chatsMap.values()).sort((a, b) => {
+              if (a.latestMessage && b.latestMessage) {
+                return b.latestMessage.createdAt - a.latestMessage.createdAt;
+              }
+              return 0;
+            });
+  
+            // Set the state with sorted chat items
+            setChats([...sortedChats]);
+          });
+  
+          return () => {
+            // Unsubscribe the previous listener for chat messages
+            unsubscribeMessages();
+          };
+        }
+      });
+    });
+  
+    return () => {
+      // Unsubscribe the previous listener for chats
+      unsubscribeChats();
+    };
+  }, [db, user]);
+  
+  
+  
+
+  // Render each chat item
+  const renderItem = ({ item }) => (
+    <Pressable style={styles.itemContainer} onPress={() => navigation.navigate("Chat_fr", { friendData: item.otherUser })}>
+      <View style={styles.contentContainer}>
+        <Image source={{ uri: item.otherUser.photoURL }} style={styles.avatar} />
+        <View style={styles.messageContainer}>
+          <Text style={styles.userName}>{item.otherUser.name}</Text>
+          {item.latestMessage && (
+            <View style={styles.latestMessageContent}>
+              <Text style={styles.latestMessageText}>{item.latestMessage.text}</Text>
+              <Text style={styles.latestMessageTimestamp}>
+                {item.latestMessage.createdAt.toDate().toLocaleString()}
+              </Text>
+              <View style={styles.separator}></View>
+            </View>
+          )}
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <Pressable style={styles.searchInput} onPress={() => navigation.navigate("SearchFriend")}>
+            <Text style={styles.textSearch}>Tìm kiếm</Text>
+          </Pressable>
+          <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
+          <Feather name="plus" size={30} color="white" />
+        </View>
+      </SafeAreaView>
+      <FlatList
+        data={chats}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.ID_room.toString() + '_' + item.otherUser.UID}
+
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  }, 
+  itemContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+    width:'100%',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  messageContainer: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  latestMessageContent: {
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 5,
+  },
+  latestMessageText: {
+    fontSize: 14,
+  },
+  latestMessageTimestamp: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#dcdcdc',
+    width: '100%',
+  },
+});
+
+export default Chat;
+
+
+////////////////////
+
+const pickImage = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') {
+    alert('Permission to access camera roll is required!');
+    return;
+  }
+
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      const { uri, type } = result;
+      console.log("URI before fetch:", uri);
+      if (type && type.startsWith('video/')) {
+        // Nếu là video, gửi URI của video
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          video: uri
+        }]);
+      } else {
+        // Nếu là ảnh, gửi URI của ảnh
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          image: uri
+        }]);
+      }
+    }
+  } catch (error) {
+    console.error('Error picking media:', error);
+  }
+};
+
+
+//////////
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { AntDesign, Feather } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, where, orderBy, getDoc, getDocs } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const db = getFirestore();
+  const storage = getStorage();
+  const navigation = useNavigation();
+  const [messages, setMessages] = useState([]);
+  const route = useRoute();
+  const { friendData } = route.params;
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image
+            });
+          });
+          setMessages(messages);
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const {  _id, createdAt, text, user, image } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let imageDownloadURL = null;
+      if (image) {
+        imageDownloadURL = await uploadImageToFirebaseStorage(image,auth.currentUser?.uid);
+      }
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '', // Đảm bảo text không bị undefined
+        user,
+        image: imageDownloadURL
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+
+  const uploadImageToFirebaseStorage = async (image, uid) => {
+    console.log(image);
+    const response = await fetch(image);
+    console.log(uid);
+    const blob = await response.blob();
+  
+    const storageRef = ref(storage, `images/${uid}/${new Date().getTime()}.jpg`);
+    await uploadBytes(storageRef, blob);
+  
+    // Lấy download URL sau khi đã upload
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false, // Không cho phép chỉnh sửa
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        const Ure = result.assets[0].uri
+        console.log("URI before fetch:", Ure);
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          image: result.assets[0].uri
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+    }
+  };
+  
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <Pressable onPress={() => navigation.navigate("Main")}>
+            <AntDesign name="arrowleft" size={20} color="white" />
+          </Pressable>
+          <Pressable style={styles.searchInput}>
+            <Text style={styles.textSearch}> {friendData.name} </Text>
+          </Pressable>
+          <Feather name="phone" size={24} color="white" />
+          <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+        </View>
+
+        <GiftedChat
+          messages={messages}
+          showAvatarForEveryMessage={false}
+          showUserAvatar={false}
+          onSend={messages => onSend(messages)}
+          messagesContainerStyle={{
+            backgroundColor: '#fff'
+          }}
+          textInputStyle={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+          }}
+          user={{
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          }}
+          renderActions={() => (
+            <Pressable onPress={pickImage}>
+              <Feather name="image" size={24} color="black" />
+            </Pressable>
+          )}
+        />
+
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+
+////////////
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { AntDesign, Feather } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const db = getFirestore();
+  const storage = getStorage();
+  const navigation = useNavigation();
+  const [messages, setMessages] = useState([]);
+  const route = useRoute();
+  const { friendData } = route.params;
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image
+            });
+          });
+          setMessages(messages);
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let fileDownloadURL = null;
+      if (image) {
+        fileDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid);
+      }
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: fileDownloadURL
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid) => {
+    console.log(file)
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const storageRef = ref(storage, `images/${uid}/${new Date().getTime()}${file.type === 'image' ? '.jpg' : '.mp4'}`);
+    await uploadBytes(storageRef, blob);
+  console.log("ok")
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        console.log(result.assets[0].uri)
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          image: result.assets[0].uri
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <Pressable onPress={() => navigation.navigate("Main")}>
+            <AntDesign name="arrowleft" size={20} color="white" />
+          </Pressable>
+          <Pressable style={styles.searchInput}>
+            <Text style={styles.textSearch}> {friendData.name} </Text>
+          </Pressable>
+          <Feather name="phone" size={24} color="white" />
+          <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+        </View>
+
+        <GiftedChat
+          messages={messages}
+          showAvatarForEveryMessage={false}
+          showUserAvatar={false}
+          onSend={messages => onSend(messages)}
+          messagesContainerStyle={{
+            backgroundColor: '#fff'
+          }}
+          textInputStyle={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+          }}
+          user={{
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          }}
+          renderActions={() => (
+            <Pressable onPress={pickImage}>
+              <Feather name="image" size={24} color="black" />
+            </Pressable>
+          )}
+        />
+
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+////
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { AntDesign, Feather } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const db = getFirestore();
+  const storage = getStorage();
+  const navigation = useNavigation();
+  const [messages, setMessages] = useState([]);
+  const route = useRoute();
+  const { friendData } = route.params;
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image
+            });
+          });
+          setMessages(messages);
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let fileDownloadURL = null;
+      if (image) {
+        fileDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid);
+      }
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: fileDownloadURL
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid) => {
+    console.log(file)
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const extension = file.split('.').pop(); // Lấy phần mở rộng của file
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension.toLowerCase());
+    const storageRef = ref(storage, `images/${uid}/${new Date().getTime()}.${isImage ? 'jpg' : 'mp4'}`);
+    await uploadBytes(storageRef, blob);
+    console.log("ok")
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+  
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        const type = result.assets[0].type;
+        const text = type.startsWith('video') ? '[Video]' : '[Hình ảnh]';
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: text,
+          image: result.assets[0].uri
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+  
+  const handleImagePress = (imageUri) => {
+    navigation.navigate('PlayVideo', { uri: imageUri });
+    console.log(imageUri);
+  };
+
+  
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <Pressable onPress={() => navigation.navigate("Main")}>
+            <AntDesign name="arrowleft" size={20} color="white" />
+          </Pressable>
+          <Pressable style={styles.searchInput}>
+            <Text style={styles.textSearch}> {friendData.name} </Text>
+          </Pressable>
+          <Feather name="phone" size={24} color="white" />
+          <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+        </View>
+
+        <GiftedChat
+          messages={messages}
+          showAvatarForEveryMessage={false}
+          showUserAvatar={false}
+          onSend={messages => onSend(messages)}
+          messagesContainerStyle={{
+            backgroundColor: '#fff'
+          }}
+          textInputStyle={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+          }}
+          user={{
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          }}
+          renderActions={() => (
+            <Pressable onPress={pickImage}>
+              <Feather style={{margin:10}} name="image" size={35} color="black" />
+            </Pressable>
+          )}
+          renderMessageImage={(props) => (
+            
+            <Pressable onPress={() => handleImagePress(props.currentMessage.image)}>
+              <Image
+                source={{ uri: props.currentMessage.image }}
+                style={{ width: 200, height: 200 }}
+                resizeMode="cover"
+              />
+            </Pressable>
+          )}
+        />
+
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+
+///////////////////////
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { AntDesign, Feather } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+import { Video } from 'expo-av';
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { friendData } = route.params;
+  const [messages, setMessages] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const db = getFirestore();
+  const storage = getStorage();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image
+            });
+          });
+          setMessages(messages);
+          console.log(messages)
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let fileDownloadURL = null;
+      let contentType = null;
+      if (image) {
+        contentType = image.toLowerCase().endsWith('.mp4') ? 'video/mp4' : 'image/jpeg';
+        fileDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid, contentType);
+      }
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: fileDownloadURL,
+        contentType: contentType // Lưu loại nội dung của tệp
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid) => {
+    console.log(file)
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const extension = file.split('.').pop(); // Lấy phần mở rộng của file
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension.toLowerCase());
+    const storageRef = ref(storage, `images/${uid}/${new Date().getTime()}.${isImage ? 'jpg' : 'mp4'}`);
+    await uploadBytes(storageRef, blob);
+    console.log("ok")
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+  
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        const type = result.assets[0].type;
+        const text = type.startsWith('video') ? '[Video]' : '[Hình ảnh]';
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: text,
+          image: result.assets[0].uri
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+  
+  const handleImagePress = (imageUri) => {
+    navigation.navigate('PlayVideo', { uri: imageUri });
+    console.log(imageUri);
+  };
+
+  
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <Pressable onPress={() => navigation.navigate("Main")}>
+            <AntDesign name="arrowleft" size={20} color="white" />
+          </Pressable>
+          <Pressable style={styles.searchInput}>
+            <Text style={styles.textSearch}> {friendData.name} </Text>
+          </Pressable>
+          <Feather name="phone" size={24} color="white" />
+          <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+        </View>
+
+        <GiftedChat
+          messages={messages}
+          showAvatarForEveryMessage={false}
+          showUserAvatar={false}
+          onSend={messages => onSend(messages)}
+          messagesContainerStyle={{
+            backgroundColor: '#fff'
+          }}
+          textInputStyle={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+          }}
+          user={{
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          }}
+          renderActions={() => (
+            <Pressable onPress={pickImage}>
+              <Feather style={{margin:10}} name="image" size={35} color="black" />
+            </Pressable>
+          )}
+          renderMessageImage={(props) => (
+            <Pressable onPress={() => handleImagePress(props.currentMessage.image)}>             
+                <Image
+                  source={{ uri: props.currentMessage.image }}
+                  style={{ width: 200, height: 200 }}
+                  resizeMode="cover"
+                />        
+            </Pressable>
+          )}
+          
+        />
+
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+
+///// 29/03
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image,TouchableWithoutFeedback } from 'react-native';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+import { Video } from 'expo-av';
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { friendData } = route.params;
+  const [messages, setMessages] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const db = getFirestore();
+  const storage = getStorage();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData.name);
+          console.log('User friend', friendData.name);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image,
+              video: doc.data().video
+            });
+          });
+          setMessages(messages);
+          console.log(messages)
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image, video } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let imageDownloadURL = null;
+      let videoDownloadURL = null;
+      let imageContentType = null;
+      let videoContentType = null;
+  
+      if (image) {
+        imageContentType = 'image/jpeg'; // assuming image is always jpeg for simplicity
+        imageDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid, imageContentType);
+      }
+  
+      if (video) {
+        videoContentType = 'video/mp4'; // assuming video is always mp4 for simplicity
+        videoDownloadURL = await uploadFileToFirebaseStorage(video, auth.currentUser?.uid, videoContentType);
+      }
+  
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: imageDownloadURL,
+        video: videoDownloadURL,
+        imageContentType,
+        videoContentType
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid, contentType) => {
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const extension = file.split('.').pop(); // Lấy phần mở rộng của file
+    let storagePath;
+    if (contentType.startsWith('image')) {
+      storagePath = `images/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('video')) {
+      storagePath = `videos/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('application')) {
+      storagePath = `documents/${uid}/${new Date().getTime()}.${extension}`;
+    } else {
+      throw new Error('Unsupported content type');
+    }
+  
+    const storageRef = ref(storage, storagePath);
+    await uploadBytes(storageRef, blob);
+    console.log("Upload complete");
+  
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        console.log(result);
+        const type = result.assets[0].type;
+        const text = type.startsWith('video') ? '[Video]' : '[Hình ảnh]';
+        const media = type.startsWith('video') ? 'video' : 'image';
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: text,
+          [media]: result.assets[0].uri // Sử dụng [media] để chọn key là 'image' hoặc 'video' tùy thuộc vào loại nội dung
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync();
+    console.log(result);
+  
+    if (!result.cancelled) {
+      const  uri  = result.assets[0].uri;
+      console.log(uri);
+      const nameFile = result.assets[0].name;
+      console.log(nameFile);
+      const fileName = uri.split('/').pop(); // Lấy tên tệp từ đường dẫn URI
+      const message = '[Tài liệu]';
+      const type = getFileType(fileName); // Lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+      onSend([
+        {
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: message,
+          document: { uri, fileName, type } // Đính kèm thông tin về tài liệu
+        }
+      ]);
+    } else {
+      console.log("No document selected");
+    }
+  };
+  
+  // Hàm để lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+  const getFileType = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    if (extension === 'pdf') {
+      return 'application/pdf';
+    } else if (extension === 'doc' || extension === 'docx') {
+      return 'application/msword';
+    } else if (extension === 'xls' || extension === 'xlsx') {
+      return 'application/vnd.ms-excel';
+    } else if (extension === 'ppt' || extension === 'pptx') {
+      return 'application/vnd.ms-powerpoint';
+    } else {
+      return 'application/octet-stream'; // Kiểu mặc định nếu không xác định được
+    }
+  };
+  
+  
+  
+  
+  
+  const handleImagePress = (imageUri) => {
+    navigation.navigate('PlayVideo', { uri: imageUri });
+    console.log(imageUri);
+  };
+
+  
+  const handleVideoPress = (videoUri) => {
+    navigation.navigate('PlayVideo', { uri: videoUri });
+    console.log(videoUri);
+  };
+  
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <Pressable onPress={() => navigation.navigate("Main")}>
+            <AntDesign name="arrowleft" size={20} color="white" />
+          </Pressable>
+          <Pressable style={styles.searchInput}>
+            <Text style={styles.textSearch}> {friendData.name} </Text>
+          </Pressable>
+          <Feather name="phone" size={24} color="white" />
+          <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+        </View>
+
+        <GiftedChat
+          messages={messages}
+          showAvatarForEveryMessage={false}
+          showUserAvatar={false}
+          onSend={messages => onSend(messages)}
+          messagesContainerStyle={{
+            backgroundColor: '#fff'
+          }}
+          textInputStyle={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+          }}
+          user={{
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          }}
+          renderActions={() => (
+            <View style={{ flexDirection: 'row' }}>
+              
+              <Pressable onPress={pickImage}>
+                <Feather style={{margin:5, marginLeft: 15}} name="image" size={35} color="black" />
+              </Pressable>   
+              
+              <Pressable >
+                <Feather style={{margin:5, marginLeft: 10}} name="mic" size={32} color="black" />
+              </Pressable>  
+
+              <Pressable onPress={pickDocument} >
+                <Ionicons style={{margin:5, marginLeft: 10}} name="file-tray-outline" size={32} color="black" />
+              </Pressable>
+            
+            </View>
+          )}
+          
+          renderMessageImage={(props) => (
+            <Pressable onPress={() => handleImagePress(props.currentMessage.image)}>             
+              <Image
+                source={{ uri: props.currentMessage.image }}
+                style={{ width: 200, height: 200 }}
+                resizeMode="cover"
+              />        
+            </Pressable>
+          )}
+          renderMessageVideo={(props) => (
+            <Pressable onPress={() => handleVideoPress(props.currentMessage.video)}>             
+              <Video
+                source={{ uri: props.currentMessage.video }}
+                style={{ width: 200, height: 200 }}
+                resizeMode="cover"
+                useNativeControls
+                shouldPlay={false}
+              />        
+            </Pressable>
+
+          )}
+        />
+
+
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+
+/////
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image,TouchableWithoutFeedback } from 'react-native';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+import { Video } from 'expo-av';
+import { GiftedChat, Message } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { friendData } = route.params;
+  const [messages, setMessages] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const db = getFirestore();
+  const storage = getStorage();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData.name);
+          console.log('User friend', friendData.name);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image,
+              video: doc.data().video,
+              document: doc.data().document
+            });
+          });
+          setMessages(messages);
+          console.log(messages)
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image, video, document } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let imageDownloadURL = null;
+      let videoDownloadURL = null;
+      let documentDownloadURL = null;
+      let imageContentType = null;
+      let videoContentType = null;
+      let documentContentType = null;
+  
+      if (image) {
+        imageContentType = 'image/jpeg'; // assuming image is always jpeg for simplicity
+        imageDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid, imageContentType);
+      }
+  
+      if (video) {
+        videoContentType = 'video/mp4'; // assuming video is always mp4 for simplicity
+        videoDownloadURL = await uploadFileToFirebaseStorage(video, auth.currentUser?.uid, videoContentType);
+      }
+  
+      if (document) {
+        documentContentType = getFileType(document.fileName); // assuming you have a function getFileType to determine content type
+        documentDownloadURL = await uploadFileToFirebaseStorage(document.uri, auth.currentUser?.uid, documentContentType);
+      }
+  
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: imageDownloadURL,
+        video: videoDownloadURL,
+        document: documentDownloadURL,
+        imageContentType,
+        videoContentType,
+        documentContentType
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid, contentType) => {
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const extension = file.split('.').pop(); // Lấy phần mở rộng của file
+    let storagePath;
+    if (contentType.startsWith('image')) {
+      storagePath = `images/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('video')) {
+      storagePath = `videos/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('application')) {
+      storagePath = `documents/${uid}/${new Date().getTime()}.${extension}`;
+    } else {
+      throw new Error('Unsupported content type');
+    }
+  
+    const storageRef = ref(storage, storagePath);
+    await uploadBytes(storageRef, blob);
+    console.log("Upload complete");
+  
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        console.log(result);
+        const type = result.assets[0].type;
+        const text = type.startsWith('video') ? '[Video]' : '[Hình ảnh]';
+        const media = type.startsWith('video') ? 'video' : 'image';
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: text,
+          [media]: result.assets[0].uri // Sử dụng [media] để chọn key là 'image' hoặc 'video' tùy thuộc vào loại nội dung
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync();
+    console.log(result);
+  
+    if (!result.cancelled) {
+      const  uri  = result.assets[0].uri;
+      console.log(uri);
+      const nameFile = result.assets[0].name;
+      console.log(nameFile);
+      const fileName = uri.split('/').pop(); // Lấy tên tệp từ đường dẫn URI
+      const message = nameFile; //'[Tài liệu]'
+      const type = getFileType(fileName); // Lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+      onSend([
+        {
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: message,
+          document: { uri, fileName, type } // Đính kèm thông tin về tài liệu
+        }
+      ]);
+    } else {
+      console.log("No document selected");
+    }
+  };
+  
+  // Hàm để lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+  const getFileType = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    if (extension === 'pdf') {
+      return 'application/pdf';
+    } else if (extension === 'doc' || extension === 'docx') {
+      return 'application/msword';
+    } else if (extension === 'xls' || extension === 'xlsx') {
+      return 'application/vnd.ms-excel';
+    } else if (extension === 'ppt' || extension === 'pptx') {
+      return 'application/vnd.ms-powerpoint';
+    } else {
+      return 'application/octet-stream'; // Kiểu mặc định nếu không xác định được
+    }
+  };
+  
+  
+  
+  
+  
+  const handleImagePress = (imageUri) => {
+    navigation.navigate('PlayVideo', { uri: imageUri });
+    console.log(imageUri);
+  };
+
+  
+  const handleVideoPress = (videoUri) => {
+    navigation.navigate('PlayVideo', { uri: videoUri });
+    console.log(videoUri);
+  };
+
+  const handleDocumentPress =  (documentInfo) => {
+   
+      const { uri } = documentInfo;
+      console.log(uri);
+  };
+  
+  
+  return (
+<View style={styles.container}>
+  <SafeAreaView>
+    <View style={styles.searchContainer}>
+      <Pressable onPress={() => navigation.navigate("Main")}>
+        <AntDesign name="arrowleft" size={20} color="white" />
+      </Pressable>
+      <Pressable style={styles.searchInput}>
+        <Text style={styles.textSearch}> {friendData.name} </Text>
+      </Pressable>
+      <Feather name="phone" size={24} color="white" />
+      <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+    </View>
+
+    <GiftedChat
+  messages={messages}
+  showAvatarForEveryMessage={false}
+  showUserAvatar={false}
+  onSend={messages => onSend(messages)}
+  messagesContainerStyle={{
+    backgroundColor: '#fff'
+  }}
+  textInputStyle={{
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  }}
+  user={{
+    _id: auth?.currentUser?.uid,
+    avatar: userData?.photoURL || 'default_avatar_url',
+  }}
+  renderActions={() => (
+    <View style={{ flexDirection: 'row' }}>
+      <Pressable onPress={pickImage}>
+        <Feather style={{margin:5, marginLeft: 15}} name="image" size={35} color="black" />
+      </Pressable>   
+      <Pressable >
+        <Feather style={{margin:5, marginLeft: 10}} name="mic" size={32} color="black" />
+      </Pressable>  
+      <Pressable onPress={pickDocument} >
+        <Ionicons style={{margin:5, marginLeft: 10}} name="file-tray-outline" size={32} color="black" />
+      </Pressable>
+    </View>
+  )}
+  renderMessage={(props) => {
+    return (
+      <Message
+        {...props}
+        containerStyle={{
+          left: {
+            backgroundColor: '#f0f0f0',
+          },
+          right: {
+            backgroundColor: '#e6e6e6',
+          },
+        }}
+        textStyle={{
+          left: {
+            color: 'black',
+          },
+          right: {
+            color: 'black',
+          },
+        }}
+        customTextStyle={{
+          fontSize: 16,
+          lineHeight: 20,
+        }}
+        renderAvatarOnTop={true}
+        // renderBubble={this.renderBubble}
+        renderSystemMessage={this.renderSystemMessage}
+        renderCustomView={this.renderCustomView}
+        renderDay={this.renderDay}
+        renderTime={this.renderTime}
+        renderMessageImage={(props) => (
+          <Pressable onPress={() => handleImagePress(props.currentMessage.image)}>             
+            <Image
+              source={{ uri: props.currentMessage.image }}
+              style={{ width: 200, height: 200 }}
+              resizeMode="cover"
+            />        
+          </Pressable>
+        )}
+        renderMessageVideo={(props) => (
+          <Pressable onPress={() => handleVideoPress(props.currentMessage.video)}>             
+            <Video
+              source={{ uri: props.currentMessage.video }}
+              style={{ width: 200, height: 200 }}
+              resizeMode="cover"
+              useNativeControls
+              shouldPlay={false}
+            />        
+          </Pressable>
+        )}
+        renderMessageDocument={(props) => (
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ marginLeft: 10 }}>
+              <Image
+                source={{ uri: props.currentMessage.user.avatar }}
+                style={{ width: 30, height: 30, borderRadius: 15 }}
+              />
+            </View>
+            <View style={{ flexDirection: 'column' }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', marginLeft: 10 }}>{props.currentMessage.user._id === user.uid ? 'You' : friendData.name}</Text>
+            <TouchableWithoutFeedback onPress={() => handleDocumentPress(props.currentMessage.document)}>
+              <View style={{ backgroundColor: '#f0f0f0', padding: 10, borderRadius: 10, maxWidth: 250, marginLeft: 10 }}>
+                <Ionicons name="document" size={24} color="black" />
+                <Text style={{ fontSize: 16, marginTop: 5 }}>{props.currentMessage.document.fileName}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+
+          </View>
+        )}
+      />
+    );
+  }}
+/>
+
+  </SafeAreaView>
+</View>
+
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;
+
+
+
+
+31/03
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, Image,TouchableWithoutFeedback } from 'react-native';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, addDoc, query, orderBy, getDoc } from 'firebase/firestore';
+import { getDownloadURL } from 'firebase/storage';
+import { Video } from 'expo-av';
+import { GiftedChat } from 'react-native-gifted-chat';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+const Chat_fr = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { friendData } = route.params;
+  const [messages, setMessages] = useState([]);
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const db = getFirestore();
+  const storage = getStorage();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.data();
+        if (userDocSnap.exists()) {
+          console.log('User data:', userData.name);
+          console.log('User friend', friendData.name);
+          setUserData(userData);
+        } else {
+          console.log('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [db, user.uid]);
+
+  useEffect(() => {
+    const fetchChatMessages = async () => {
+      try {
+        const chatRoomId = [userData?.UID, friendData?.UID].sort().join('_');
+        const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+        const q = query(chatMessRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, snapshot => {
+          const messages = [];
+          snapshot.forEach(doc => {
+            messages.push({
+              _id: doc.id,
+              createdAt: doc.data().createdAt.toDate(),
+              text: doc.data().text,
+              user: doc.data().user,
+              image: doc.data().image,
+              video: doc.data().video,
+              document: doc.data().document
+            });
+          });
+          setMessages(messages);
+          console.log(messages)
+        });
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    const unsubscribe = fetchChatMessages();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [db, userData?.UID, friendData?.UID]);
+
+  const onSend = useCallback(async (messages = []) => {
+    const messageToSend = messages[0];
+    if (!messageToSend) {
+      return;
+    }
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages)
+    );
+  
+    const { _id, createdAt, text, user, image, video, document } = messageToSend;
+    const chatRoomId = [auth.currentUser?.uid, friendData?.UID].sort().join('_');
+    const chatMessRef = collection(db, 'Chats', chatRoomId, 'chat_mess');
+  
+    try {
+      let imageDownloadURL = null;
+      let videoDownloadURL = null;
+      let documentDownloadURL = null;
+      let imageContentType = null;
+      let videoContentType = null;
+      let documentContentType = null;
+  
+      if (image) {
+        imageContentType = 'image/jpeg'; // assuming image is always jpeg for simplicity
+        imageDownloadURL = await uploadFileToFirebaseStorage(image, auth.currentUser?.uid, imageContentType);
+      }
+  
+      if (video) {
+        videoContentType = 'video/mp4'; // assuming video is always mp4 for simplicity
+        videoDownloadURL = await uploadFileToFirebaseStorage(video, auth.currentUser?.uid, videoContentType);
+      }
+  
+      if (document) {
+        documentContentType = getFileType(document.fileName); // assuming you have a function getFileType to determine content type
+        documentDownloadURL = await uploadFileToFirebaseStorage(document.uri, auth.currentUser?.uid, documentContentType);
+      }
+  
+      addDoc(chatMessRef, {
+        _id,
+        createdAt,
+        text: text || '',
+        user,
+        image: imageDownloadURL,
+        video: videoDownloadURL,
+        document: documentDownloadURL,
+        imageContentType,
+        videoContentType,
+        documentContentType
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [db, auth.currentUser?.uid, friendData?.UID]);
+  
+  
+
+  const uploadFileToFirebaseStorage = async (file, uid, contentType) => {
+    const response = await fetch(file);
+    const blob = await response.blob();
+  
+    const extension = file.split('.').pop(); // Lấy phần mở rộng của file
+    let storagePath;
+    if (contentType.startsWith('image')) {
+      storagePath = `images/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('video')) {
+      storagePath = `videos/${uid}/${new Date().getTime()}.${extension}`;
+    } else if (contentType.startsWith('application')) {
+      storagePath = `documents/${uid}/${new Date().getTime()}.${extension}`;
+    } else {
+      throw new Error('Unsupported content type');
+    }
+  
+    const storageRef = ref(storage, storagePath);
+    await uploadBytes(storageRef, blob);
+    console.log("Upload complete");
+  
+    const downloadURL = await getDownloadURL(storageRef);
+  
+    return downloadURL;
+  };
+  
+  
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        console.log(result);
+        const type = result.assets[0].type;
+        const text = type.startsWith('video') ? '[Video]' : '[Hình ảnh]';
+        const media = type.startsWith('video') ? 'video' : 'image';
+        onSend([{
+          _id: Math.random().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: auth?.currentUser?.uid,
+            avatar: userData?.photoURL || 'default_avatar_url',
+          },
+          text: text,
+          [media]: result.assets[0].uri // Sử dụng [media] để chọn key là 'image' hoặc 'video' tùy thuộc vào loại nội dung
+        }]);
+      }
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync();
+    console.log(result);
+  
+    if (!result.cancelled) {
+      const uri = result.uri;
+      console.log(uri);
+      const nameFile = result.name;
+      console.log(nameFile);
+      const fileName = uri.split('/').pop(); // Lấy tên tệp từ đường dẫn URI
+      const message = nameFile; //'[Tài liệu]'
+      const extension = getFileExtension(fileName); // Lấy phần mở rộng của tên tệp
+      if (!isImageFile(extension) && !isVideoFile(extension)) { // Kiểm tra xem tệp có phải là hình ảnh hoặc video không
+        const type = getFileType(extension); // Lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+        onSend([
+          {
+            _id: Math.random().toString(),
+            createdAt: new Date(),
+            user: {
+              _id: auth.currentUser?.uid,
+              avatar: userData?.photoURL || 'default_avatar_url',
+            },
+            text: message,
+            document: { uri, fileName, type } // Đính kèm thông tin về tài liệu
+          }
+        ]);
+      } else {
+        console.log("Selected file is an image or video. Please select a document.");
+      }
+    } else {
+      console.log("No document selected");
+    }
+  };
+  
+  // Hàm để lấy phần mở rộng của tên tệp
+  const getFileExtension = (fileName) => {
+    return fileName.split('.').pop().toLowerCase();
+  };
+  
+  // Hàm kiểm tra xem phần mở rộng của tên tệp có phải là hình ảnh không
+  const isImageFile = (extension) => {
+    return extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif';
+  };
+  
+  // Hàm kiểm tra xem phần mở rộng của tên tệp có phải là video không
+  const isVideoFile = (extension) => {
+    return extension === 'mp4' || extension === 'mov' || extension === 'avi' || extension === 'mkv';
+  };
+  
+  // Hàm để lấy kiểu tệp dựa trên phần mở rộng của tên tệp
+  const getFileType = (extension) => {
+    if (extension === 'pdf') {
+      return 'application/pdf';
+    } else if (extension === 'doc' || extension === 'docx') {
+      return 'application/msword';
+    } else if (extension === 'xls' || extension === 'xlsx') {
+      return 'application/vnd.ms-excel';
+    } else if (extension === 'ppt' || extension === 'pptx') {
+      return 'application/vnd.ms-powerpoint';
+    } else {
+      return 'application/octet-stream'; // Kiểu mặc định nếu không xác định được
+    }
+  };
+  
+  
+  
+  
+  
+  const handleImagePress = (imageUri) => {
+    navigation.navigate('PlayVideo', { uri: imageUri });
+    console.log(imageUri);
+  };
+
+  
+  const handleVideoPress = (videoUri) => {
+    navigation.navigate('PlayVideo', { uri: videoUri });
+    console.log(videoUri);
+  };
+
+  const handleDocumentPress =  (documentInfo) => {
+   
+     console.log(documentInfo)
+  };
+  
+  
+  return (
+<View style={styles.container}>
+  <SafeAreaView>
+    <View style={styles.searchContainer}>
+      <Pressable onPress={() => navigation.navigate("Main")}>
+        <AntDesign name="arrowleft" size={20} color="white" />
+      </Pressable>
+      <Pressable style={styles.searchInput}>
+        <Text style={styles.textSearch}> {friendData.name} </Text>
+      </Pressable>
+      <Feather name="phone" size={24} color="white" />
+      <Feather style={{ marginLeft: 10 }} name="list" size={30} color="white" />
+    </View>
+    <GiftedChat
+  messages={messages}
+  showAvatarForEveryMessage={false}
+  showUserAvatar={false}
+  onSend={messages => onSend(messages)}
+  messagesContainerStyle={{
+    backgroundColor: '#fff'
+  }}
+  textInputStyle={{
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  }}
+  user={{
+    _id: auth?.currentUser?.uid,
+    avatar: userData?.photoURL || 'default_avatar_url',
+  }}
+  renderActions={() => (
+    <View style={{ flexDirection: 'row' }}>
+      <Pressable onPress={pickImage}>
+        <Feather style={{margin:5, marginLeft: 15}} name="image" size={35} color="black" />
+      </Pressable>   
+      <Pressable >
+        <Feather style={{margin:5, marginLeft: 10}} name="mic" size={32} color="black" />
+      </Pressable>  
+      <Pressable onPress={pickDocument} >
+        <Ionicons style={{margin:5, marginLeft: 10}} name="file-tray-outline" size={32} color="black" />
+      </Pressable>
+    </View>
+  )}
+  renderMessage={(props) => {
+    const isCurrentUser = props.currentMessage.user && props.currentMessage.user._id === auth?.currentUser?.uid;
+    const isFirstMessage = isCurrentUser || !props.previousMessage || (props.previousMessage.user && props.previousMessage.user._id !== props.currentMessage.user._id);
+    return (
+      <View style={{ flexDirection: 'row', justifyContent: isCurrentUser ? 'flex-end' : 'flex-start' }}>
+        {!isCurrentUser && isFirstMessage && props.currentMessage.user && (
+          <View style={{ marginLeft: 10 }}>
+            <Image
+              source={{ uri: props.currentMessage.user.avatar }}
+              style={{ width: 30, height: 30, borderRadius: 15 }}
+            />
+          </View>
+        )}
+        <View style={{ flexDirection: 'column' }}>
+          {isFirstMessage && !isCurrentUser && props.currentMessage.user && <Text style={{ fontSize: 16, fontWeight: 'bold', marginLeft: 10 }}>{friendData.name}</Text>}
+          <View style={{ backgroundColor: isCurrentUser ? 'blue' : 'green', padding: 10, borderRadius: 10, maxWidth: 250, marginLeft: isFirstMessage ? 0 : 40, marginRight: isFirstMessage ? 10 : 0, marginTop: isFirstMessage ? 10 : 10 }}>
+            {props.currentMessage.document ? (
+              <TouchableWithoutFeedback onPress={() => handleDocumentPress(props.currentMessage.document)}>
+                <View>
+                  <Ionicons name="document" size={24} color="black" />
+                  <Text style={{ fontSize: 16, marginTop: 5 }}>{props.currentMessage.text}</Text>
+                </View>
+              </TouchableWithoutFeedback>
+            ) : props.currentMessage.image ? (
+              <Pressable onPress={() => handleImagePress(props.currentMessage.image)}>             
+                <Image
+                  source={{ uri: props.currentMessage.image }}
+                  style={{ width: 200, height: 200 }}
+                  resizeMode="cover"
+                />        
+              </Pressable>
+            ) : props.currentMessage.video ? (
+              <Pressable onPress={() => handleVideoPress(props.currentMessage.video)}>             
+                <Video
+                  source={{ uri: props.currentMessage.video }}
+                  style={{ width: 200, height: 200 }}
+                  resizeMode="cover"
+                  useNativeControls
+                  shouldPlay={false}
+                />        
+              </Pressable>
+            ) : (
+              <Text style={{ fontSize: 16, marginTop: 5 }}>{props.currentMessage.text}</Text>
+            )}
+          </View>
+        </View>
+      </View>
+    );
+  }}
+  
+/>
+
+  </SafeAreaView>
+</View>
+
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    justifyContent: "center",
+    height: 48,
+    marginLeft: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500',
+    marginLeft: 20
+  }
+});
+
+export default Chat_fr;

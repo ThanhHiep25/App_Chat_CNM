@@ -1,0 +1,162 @@
+.list-friend {
+  margin: 10px;
+  flex-direction: row;
+  display: flex;
+}
+.img-list {
+  height: 30px;
+  width: 30px;
+}
+.text-list {
+  font-size: 16px;
+  margin:10px;
+  font-weight: bold;
+}
+.btn-list {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  border: none;
+  background-color: white;
+  width: 350px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-list:hover {
+  background-color: #94979c96;
+}
+.Chat-list11 {
+  flex-direction: row;
+  display: flex;
+}
+.list-friend1 {
+  flex-direction: row;
+  display: flex;
+  /* margin-bottom: 650px;
+    align-items: center; */
+  margin: 10px;
+  justify-content: center;
+  height: 5%;
+  align-items: center;
+  margin-right: 180px;
+  margin-bottom: 30px;
+}
+.list-ff {
+  height: 80%;
+  width: 100%;
+  padding: 17px;
+}
+.Border-list1 {
+  height: 80vh;
+  padding: 10px;
+  overflow: scroll;
+  overflow-x: hidden;
+  width: 600px;
+}
+.btn-chat1 {
+  border: none;
+  background-color: #d8d1d13b;
+  height: 70px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-top: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-chat1:hover {
+  background-color: #d9dce086;
+  cursor: pointer;
+}
+
+.text-listfriend {
+  font-size: 25px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-left: 30px;
+}
+.list-fff {
+  flex-direction: row;
+  display: flex;
+  right: 50px;
+}
+
+.chat-set-phone{
+  display: flex;
+  flex-direction: row;
+  align-items: center;  
+  width: 200px;
+}
+
+.lphone-user-resender{
+  margin-left: 20px;
+}
+
+/*Search chat*/
+.search-chat1 {
+  height: 25px;
+  border: none;
+  padding: 2px;
+  padding-left: 5px;
+  border-radius: 4px;
+  width: 200px;
+  margin-left: 45px;
+}
+.list-option {
+  width: 200px;
+  margin-left: 100px;
+
+  border-radius: 5px;
+  border: none;
+}
+.search-chat2 {
+  height: 25px;
+  border: none;
+  padding: 2px;
+  padding-left: 5px;
+  border-radius: 4px;
+  width: 200px;
+}
+
+
+/* List fen chat */
+.list-option1 {
+  width: 200px;
+  margin-left: 100px;
+
+  border-radius: 5px;
+  border: none;
+}
+.text-listfriend1 {
+  font-size: 25px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-right: 80px;
+}
+.list-friend2 {
+  flex-direction: row;
+  display: flex;
+  /* margin-bottom: 650px;
+    align-items: center; */
+  margin: 10px;
+  justify-content: center;
+  height: 5%;
+  align-items: center;
+  margin-right: 300px;
+  margin-bottom: 30px;
+}
+
+.btn-lp-menu {
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: rgba(240, 248, 255, 0);
+  border-radius: 5px;
+}

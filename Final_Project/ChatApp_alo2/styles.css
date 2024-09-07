@@ -1,0 +1,24 @@
+.switch-theme,
+.switch-theme:focus,
+.switch-theme:active {
+  position: fixed !important;
+  left: 16px;
+  bottom: 20px;
+  z-index: 999;
+  background: #141415;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.section-container {
+  width: unset !important;
+  min-height: unset !important;
+  padding: 16px;
+  margin: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.slide-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}

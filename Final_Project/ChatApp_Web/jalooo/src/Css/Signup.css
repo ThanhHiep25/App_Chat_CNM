@@ -1,0 +1,159 @@
+.container1 {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #a7efef;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-bar {
+  height:auto;
+  width: 600px;
+  background-color: rgba(128, 128, 128, 0.479);
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 50px;
+}
+
+.sg-div{
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+
+
+.in {
+  width: 330px;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.pab {
+    width: 295px;
+    padding-right: 45px;
+}
+
+.in-otp {
+  height: 30px;
+  width: 190px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+  padding: 3px;
+  padding-left: 10px;
+  border-style: dashed;
+}
+
+.gender{
+  width: 320px;
+  height: 50px;
+}
+
+.group-in {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.group-otp {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+}
+.btn-otp {
+  height: 50px;
+  width: 90px;
+  border-radius: 5px;
+  margin: 10px;
+  border: none;
+  background-color: rgb(29, 128, 209);
+  cursor: pointer;
+}
+
+.group-pass-sign {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  margin-top: 10px;
+  width: 330px;
+}
+
+.btn-pass-sign {
+  height: 31px;
+  width: 31px;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background-color: rgba(253, 253, 253, 0);
+  position: absolute;
+  margin-left: 285px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-sub-sign{
+  height: 50px;
+  width: 200px;
+  margin-top: 40px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgb(24, 106, 212);
+  cursor: pointer;
+}
+
+.logo-unseen-sign {
+  height: 25px;
+  width: 25px;
+  margin-top: 10px;
+  margin-left: 40px;
+}
+
+.container-lg{
+  display: flex;
+  flex-direction: column;
+  background-color: #a7efef;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.btn-lg-signup{
+  height: 50px;
+  width: 120px;
+  border-radius: 20px;
+  margin: 10px;
+  border: none;
+  background-color: rgba(153, 204, 245, 0.719);
+  font-size: 14px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #fcfcfc;
+  cursor: pointer;
+}
+
+.btn-lg-signup:hover{
+  background-color: rgba(65, 162, 241, 0.884);
+  font-weight: bold;
+  box-shadow: 2px 2px 4px black;
+}

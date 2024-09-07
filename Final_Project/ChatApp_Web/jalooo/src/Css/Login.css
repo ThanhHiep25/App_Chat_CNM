@@ -1,0 +1,150 @@
+/*Background*/
+.App-Login {
+  background-color: #a7efef;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Khung bao IMG vs Input */
+.Bar-Border {
+  height: auto;
+  width: 500px;
+  background-color: rgba(189, 185, 185, 0.61);
+  border-radius: 30px;
+  box-shadow: 2px 4px 4px 2px #1c28367e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.Bar-img {
+  margin: 20px;
+}
+
+.img_logo {
+  height: 100px;
+  width: 100px;
+}
+
+/* Khung bao IMG vs Input */
+.Group-login-pass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lg-div {
+  display: flex;
+  flex-direction: column;
+}
+
+.lg-m {
+  margin-top: 20px;
+}
+
+.txt-lg {
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+}
+
+.input-email {
+  width: 350px;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.input-email:hover {
+  box-shadow: 0px 1px 4px 2px #26bbae7e;
+}
+
+.input-pass {
+  width: 340px;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  padding-right: 50px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.input-pass:hover {
+  box-shadow: 0px 1px 4px 2px #26bbae7e;
+}
+
+.group-pass-login {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-pass-login {
+  height: 30px;
+  width: 30px;
+  border-radius: 3px;
+  border: none;
+  background-color: #ffffff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 320px;
+  position: absolute;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+/*button va textbutton*/
+.btn-sub {
+  height: 50px;
+  width: 200px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgb(24, 106, 212);
+}
+
+.btn-sub:hover {
+  background-color: rgb(24, 159, 212);
+}
+
+.text-sub {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffff;
+}
+
+.Group-another-login {
+  margin-top: 20px;
+}
+
+.another-login {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.another-login .logo-another-login {
+  height: 50px;
+  width: 50px;
+}
+
+.fg-pass {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.fg-pass:hover {
+  color: rgb(6, 55, 187);
+  font-weight: bold;
+}

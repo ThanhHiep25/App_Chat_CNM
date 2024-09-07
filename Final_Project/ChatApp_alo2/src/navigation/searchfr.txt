@@ -1,0 +1,245 @@
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Pressable, StyleSheet, Text, View, TextInput, Image, FlatList } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getFirestore, collection, query, where, getDocs , doc, setDoc, getDoc, addDoc} from "firebase/firestore";
+import { getAuth} from "firebase/auth";
+const SearchFriend = () => {
+  const navigation = useNavigation();
+  const [input, setInput] = useState("");
+  const [friendsList, setFriendsList] = useState([]);
+  const [userFriendsList, setUserFriendsList] = useState([]);
+  const auth = getAuth();
+  const handleInputChange = (text) => {
+    setInput(text);
+  };
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log(user)
+      } else {
+        console.log("nouser")
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+  const fetchUserFriends = async () => {
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+
+        if (userDocSnapshot.exists()) {
+          const userData = userDocSnapshot.data();
+          const friendsCollectionRef = collection(userDocRef, "friendData");
+          const friendsSnapshot = await getDocs(friendsCollectionRef);
+
+          const userFriends = [];
+          friendsSnapshot.forEach((doc) => {
+            const friendData = doc.data();
+            userFriends.push({
+              id: doc.id,
+              name: friendData.name_fr,
+              photoUrl: friendData.photoURL_fr,
+              userId: friendData.userId_fr
+            });
+          });
+
+          setUserFriendsList(userFriends);
+        } else {
+          console.error("User document does not exist!");
+        }
+      } else {
+        console.error("No user signed in!");
+      }
+    } catch (error) {
+      console.error("Error fetching user friends:", error);
+    }
+  };
+  useEffect(() => {
+
+    fetchUserFriends();
+  }, []);
+
+  const renderUserFriendItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Pressable>
+        <Image style={styles.image} source={{ uri: item.photoUrl }} />
+        <Text style={styles.text}>{item.name}</Text>
+      </Pressable>
+    </View>
+  );
+
+  const handleSearch = async () => {
+    try {
+      const db = getFirestore();
+      const userQuery = query(collection(db, "users"), where("name", "==", input));
+      const userSnapshot = await getDocs(userQuery);
+  
+      const foundFriends = [];
+      userSnapshot.forEach(doc => {
+        const userData = doc.data(); 
+        foundFriends.push({
+          id: foundFriends.length + 1, // Tự động tạo id tuần tự
+          name: userData.name,
+          photoUrl: userData.photoURL,
+          userId: userData.userId
+        });
+      });
+  
+      setFriendsList(foundFriends); // Sửa thành setFriendsList
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+  
+  const handleAddFriend = async (friend) => {
+    try {
+        const db = getFirestore();
+        const auth = getAuth();
+        const user = auth.currentUser;
+  
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid); // Sử dụng id của người dùng hiện tại
+            const userDocSnapshot = await getDoc(userDocRef);
+  
+            if (userDocSnapshot.exists()) {
+                const userData = userDocSnapshot.data();
+                const friendData = {
+                    name_fr: friend.name,
+                    photoURL_fr: friend.photoUrl,
+                    userId_fr: friend.userId
+                };
+  
+                // Tạo một tài liệu mới trong subcollection "friendData" và Firebase sẽ tự động tạo một ID duy nhất
+                await addDoc(collection(userDocRef, "friendData"), friendData);
+  
+                console.log("Friend added successfully!");
+                fetchUserFriends();
+            } else {
+                console.error("User document does not exist!");
+            }
+        } else {
+            console.error("No user signed in!");
+        }
+    } catch (error) {
+        console.error("Error adding friend:", error);
+    }
+};
+
+
+
+  const renderFriendItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Pressable>
+        <Image style={styles.image} source={{ uri: item.photoUrl }} />
+        <Text style={styles.text}>{item.name}</Text>
+      </Pressable>
+      <Pressable style={styles.addButton} onPress={() => handleAddFriend(item)}>
+        <Text style={styles.addButtonText}>Add Friend</Text>
+      </Pressable>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView>
+        <View style={styles.searchContainer}>
+          <AntDesign name="search1" size={20} color="white" />
+          <TextInput
+            style={styles.searchInput}
+            value={input}
+            onChangeText={handleInputChange}
+            placeholder="...... "
+            placeholderTextColor="white"
+          />
+          <Pressable
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed ? '#0d47a1' : '#006AF5', // Màu nền thay đổi khi nút được nhấn
+                paddingHorizontal: 10,
+                borderRadius: 5, // Bo tròn các góc
+              },
+              styles.searchButton // Thêm style từ StyleSheet
+            ]}
+            onPress={handleSearch}
+          >
+            <Text style={styles.textSearch}>Tìm kiếm bạn bè</Text>
+          </Pressable>
+        </View>
+
+        {/* Sử dụng FlatList để hiển thị danh sách bạn bè */}
+        <FlatList
+          data={friendsList}
+          renderItem={renderFriendItem}
+          keyExtractor={item => item.id}
+        />
+
+        <FlatList
+            data={userFriendsList}
+            renderItem={renderUserFriendItem}
+            keyExtractor={(item) => item.id}
+          />
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#006AF5",
+    padding: 9,
+    height: 48,
+    width: '100%',
+  },
+  searchInput: {
+    flex: 1,
+    height: 48,
+    marginLeft: 10,
+    color: 'white',
+  },
+  searchButton: {
+    paddingHorizontal: 10,
+  },
+  textSearch: {
+    color: "white",
+    fontWeight: '500'
+  },
+  itemContainer: {
+    marginTop: 20,
+    flex: 1,
+    margin: 20,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+  },
+  text: {
+    marginTop: 10,
+  },
+  addButton: {
+    backgroundColor: '#006AF5',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
+
+export default SearchFriend;

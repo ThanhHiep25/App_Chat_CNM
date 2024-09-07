@@ -1,0 +1,97 @@
+.modal-setup-infor{
+    height: 800px;
+    width: 600px;
+}
+
+.text-logout-infor{
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-infor{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    width: 500px;
+    padding: 20px;
+    padding-top: 50px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(247, 247, 247);
+    box-shadow: 1px 2px 2px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.form-group{
+    display: flex;
+    flex-direction: column;
+    height: 80px;
+    width: 400px;
+    margin: 10px;
+}
+
+.form-group-img{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 200px;
+    width: 400px;
+    margin: 10px;
+}
+
+.form-control{
+    height: 30px;
+    width: 390px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.input-img-infor{
+    height: 40px;
+    width: 90px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
+    
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.btn-setup-modal-infor{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.img-user-infor{
+    height: 100px;
+    width: 100px;
+    border-radius: 55px;
+    border: 1px solid black;
+    justify-content: center;
+}
+
+.container-Logout-infores{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.radio-buttons{
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+}

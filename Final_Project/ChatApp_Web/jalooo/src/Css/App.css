@@ -1,0 +1,111 @@
+.App {
+  background-color: #a7efef;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap-reverse;
+}
+
+.App-logo {
+  height: 50px;
+  width: 50px;
+}
+
+.App-header {
+  margin: 20px;
+}
+
+.group_title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 30px;
+}
+
+.group_title .title {
+  color: #233953;
+  font-family: "Inter-Bold", Helvetica;
+  font-size: 40px;
+  font-weight: 700;
+  width: 500px;
+}
+.group_title .title_2 {
+  color: #23967b;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  width: 500px;
+}
+.group_title .title_3 {
+  color: #000000;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 16px;
+  font-weight: 400;
+  width: 500px;
+}
+
+.App-body {
+  margin: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  background-color: #a7efef;
+}
+
+.Image_chat_1 {
+  margin-left: 150px;
+  margin-top: 10px;
+}
+.Image_chat_2 {
+  margin-left: 60px;
+}
+
+.chat_gif {
+  margin: 20px;
+  margin-right: 100px;
+}
+
+.Gif_chat {
+  height: 180px;
+  width: 180px;
+  border-radius: 50%;
+}
+
+.btn_dn {
+  align-items: center;
+  height: 50px;
+  width: 150px;
+  border-radius: 20px;
+  border: none;
+  box-shadow:2px 2px #233953b9;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn_dn:hover {
+  background-color: #27db9f;
+  color: aliceblue;
+}
+
+.btn_dk {
+  height: 50px;
+  width: 150px;
+  border-radius: 20px;
+  border: none;
+  box-shadow:2px 2px #233953b9;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn_dk:hover {
+  background-color: #27db9f;
+  color: aliceblue;
+}
+
+.footer{
+  height: 50px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background-color: #233953;
+}
